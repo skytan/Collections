@@ -1,0 +1,10 @@
+#ifndef WINDOW_SALE_H
+#define WINDOW_SALE_H
+
+#include "sui.h"
+
+void saleMainWindow();
+
+
+#endif
+

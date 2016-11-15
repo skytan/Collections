@@ -1,0 +1,24 @@
+#ifndef SGB2312_H
+#define SGB2312_H
+
+unsigned unicode_to_gbk(unsigned u);
+
+static inline unsigned gb2312_pos(unsigned g)
+{
+	unsigned h = (g >> 8) & 0xff;
+	unsigned l = g & 0xff;
+
+	unsigned pos = (0xfe - 0xa0) * (h - 0xb0) + ( l - 0xa1 );
+
+	return pos;
+}
+
+static inline int is_gb2312(unsigned g)
+{
+	unsigned h = g >> 8 & 0xff;
+	unsigned l = g & 0xff;
+
+	return ( h <= 0xf7 && h >= 0xb0 ) && ( l <= 0xfe && l >= 0xa1 );
+}
+
+#endif

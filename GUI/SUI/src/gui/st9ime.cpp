@@ -1,0 +1,334 @@
+#include <ctype.h>
+#include <wchar.h>
+#include <string.h>
+#include "st9ime.h"
+#include "spinyin.h"
+#include "sfont.h"
+#include "swordgb2312.h"
+#include "sperr.h"
+#include "sgb2312.h"
+
+
+sT9ime::sT9ime(int t, int l)
+{
+	m_top = t;
+	m_buttom = m_top + get_font_height() + 6;
+	
+	m_left = l;
+	m_right = getXres() - 1;
+
+	m_pos = 0;
+	m_beginpos = 0;
+	m_lineword = (m_right - m_left) / get_font_weight();
+	m_lineword = m_lineword > 32 ? 32 : m_lineword;
+	
+	print("%d", m_lineword);
+	
+	memset(m_pinyin, 0, sizeof(m_pinyin));
+}
+
+sT9ime::~sT9ime()
+{
+}
+
+void sT9ime::reset(int t, int l)
+{
+	m_top = t;
+	m_buttom = m_top + get_font_height() + 4;
+	
+	m_left = l;
+	m_right = getXres() - 1;
+	
+	m_t9 = 0;
+	m_beginpos = 0;
+	m_pinyin[0] = '\0';
+	m_text[0] = L'\0';
+
+	update();
+}
+
+
+int sT9ime::linefont()
+{
+	return 6;
+	int i = ((m_lineword - 4) >> 1) - 1;
+	
+	return i > 10 ? 10 : i;
+}
+	
+void sT9ime::alpha(class sEvent *e)
+{
+}
+
+void sT9ime::keyUpdate(class sEvent *e)
+{
+	if(e) e->setType(0);
+	
+	m_beginpos = 0;
+	m_pos = 0;
+	update();
+}
+
+void sT9ime::keyzero(class sEvent *e)
+{	
+	if( !m_pinyin[0] || m_pinyin[0] == '0' )
+	{
+		m_pinyin[0] = '0';
+		m_pinyin[1] = '\0';
+		return keyUpdate(e);
+	}
+	
+	if( !m_t9 ) return;
+
+	const struct t9_py *tmp = t9_py_next(m_t9);
+	if( tmp == m_t9 ) return;
+	
+	m_t9 = tmp;
+	setText( m_t9->str );
+	keyUpdate(e);	
+}
+
+void sT9ime::digit(class sEvent *e)
+{
+	int len = strlen(m_pinyin);
+	char c = static_cast<char>( e->getValue() );
+	e->setType(0);
+	
+	if( c == '0' && m_pinyin[0] != '0' ) return keyzero(e);
+	
+	if( len > 5 ) return;
+			
+	m_pinyin[len] = c;
+	m_pinyin[len + 1] = '\0';
+	
+	if( m_pinyin[0] == '0' )
+	{
+		unsigned g = atoi(m_pinyin);
+		
+		if( is_gb2312(g) )
+		{
+			m_text[0] = gbk2312_to_unicode(g);
+			m_text[1] = L'\0';
+		}
+		
+		update();
+		return;
+	}
+	
+	const struct t9_py *tmp = t9_py_ime(m_pinyin);
+	
+	if(tmp)
+	{
+		m_t9 = tmp;
+		setText(m_t9->str);
+	}
+	else
+	{
+		m_pinyin[len] = L'\0';
+	}
+	
+	keyUpdate(e);
+}
+
+void sT9ime::keyenter(class sEvent *e)
+{	
+	if( wcslen( m_text ) > m_beginpos + m_pos )
+	{
+		e->setValue( m_text[m_beginpos + m_pos] );
+		setText( get_gb2312_word( m_text[m_beginpos + m_pos] ) );
+
+		m_t9 = 0;
+		m_pinyin[0] = '\0';
+		
+		return keyUpdate();
+	}
+
+	m_t9 = 0;
+	m_pinyin[0] = '\0';
+	keyUpdate(e);
+}
+
+void sT9ime::backspace(class sEvent *e)
+{
+	int len = strlen(m_pinyin);     
+	e->setType(0);
+	
+	if( len <= 0 )
+	{
+		return;
+	}
+
+	m_pinyin[ len - 1 ] = '\0';
+	
+	if( m_pinyin[0] == '0' ) return keyUpdate();
+	
+	const struct t9_py *tmp = t9_py_ime(m_pinyin);
+	
+	if(tmp)
+	{
+		m_t9 = tmp;
+		setText(m_t9->str);
+	}
+	else
+	{
+		m_t9 = 0;
+		m_text[0] = L'\0';
+	}
+
+	keyUpdate();
+}
+
+void sT9ime::addsub(class sEvent *e)
+{
+	char c = static_cast<char>( e->getValue() );
+	int i = linefont();
+	
+	if( c == '+' || c == '=' )
+	{
+		if( wcslen( m_text ) > m_beginpos + i ) m_beginpos += i;
+	}
+	else
+	{
+		if( m_beginpos >= i ) m_beginpos -= i;
+	}
+	
+	e->setType(0);
+	this->update();
+}
+
+void sT9ime::keyup(class sEvent *e)
+{
+	char c = static_cast<char>( e->getValue() );
+	int i = linefont();	
+
+	if( m_beginpos >= i )
+	{
+		m_beginpos -= i;
+		m_pos = 0;
+	}
+	
+	e->setType(0);
+	this->update();
+}
+
+void sT9ime::keydown(class sEvent *e)
+{
+	char c = static_cast<char>( e->getValue() );
+	int i = linefont();
+	
+	if( wcslen( m_text ) > m_beginpos + i )
+	{
+		m_beginpos += i;
+		m_pos = 0;
+	}
+	
+	e->setType(0);
+	this->update();
+}
+
+void sT9ime::keyleft(class sEvent *e)
+{
+	m_pos--;
+	if( m_pos < 0  ) m_pos = linefont() - 1;
+
+	while( !m_text[ m_beginpos + m_pos ] ) m_pos--;
+	
+	e->setType(0);
+	this->update();
+}
+
+void sT9ime::keyright(class sEvent *e)
+{
+	m_pos++;
+	if( m_pos >= linefont() || !m_text[ m_beginpos + m_pos ] ) m_pos = 0;
+	
+	e->setType(0);
+	this->update();
+}
+
+void sT9ime::keydit(class sEvent *e)
+{
+	m_beginpos = 0;
+	m_pos = 0;
+	m_t9 = 0;
+	m_pinyin[0] = '\0';
+
+	wchar_t i;
+	for(i = L'!'; i <= L'~'; i++) m_text[ i - L'!' ] = i;
+
+	m_text[ i ] = 0;
+	
+	this->update();	
+}
+
+void sT9ime::keyEvent(class sEvent *e)
+{
+	wchar_t c = (e->getValue());
+
+	if( isdigit( (char) c) )
+		return digit(e);
+
+	switch(c)
+	{
+		case KEY_BACKSPACE:
+			backspace(e);
+			break;
+		case KEY_UP:
+			keyup(e);
+			break;
+		case KEY_DOWN:
+			keydown(e);
+			break;
+		case KEY_LEFT:	
+			keyleft(e);
+			break;
+		case KEY_RIGHT:
+			keyright(e);
+			break;
+		case KEY_ENTER:
+			keyenter(e);
+			break;
+		case KEY_DIT:
+			keydit(e);
+			break;
+		default:
+			break;
+	}
+}
+
+
+void sT9ime::update()
+{	
+	int x = m_left + 2;
+	int y = m_top + 4;
+	wchar_t i;
+	
+	
+	fillRect();
+	drawRect();
+
+	if( m_t9 ) 
+	{
+		x = drawText(x, y, m_t9->py );
+	}else if( m_pinyin[0] == '0' )
+	{
+		x = drawText(x, y, m_pinyin );
+	}
+	
+	x += drawFont(x, y, L':') + 2;
+	
+	int imax = m_beginpos + linefont();
+
+	for(i = m_beginpos; i <  imax && m_text[i]; i++)
+	{
+		if( (i - m_beginpos) == m_pos &&  m_text[i] )
+		{
+			drawRect(x - 1, y - 1, x + get_font_weight(m_text[i]), y + get_font_height(), 1);
+		}
+		
+		x += drawFont(x, y, m_text[i] ) + 2;
+	}
+
+	if( i == imax ) drawFont(x, y, L'>' );
+}
+

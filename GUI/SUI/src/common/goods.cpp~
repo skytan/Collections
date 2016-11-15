@@ -1,0 +1,473 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include "goods.h"
+#include "../perr.h"
+#include "../common.h"
+
+
+void goods_show(struct goods *ptrGoods)
+{
+	printf("entry:\t%s\n", ptrGoods->szEntry);
+	printf("Price:\t%d\n", ptrGoods->iPrice);
+	printf("Model:\t%s\n", ptrGoods->szModel);
+	printf("Type:\t%s\n", ptrGoods->szType);
+}
+
+
+int goods_init()
+{
+	int i, len;
+	struct goods stgood;
+	FILE *f;
+	
+	if( access(GOODS_NAME, F_OK) != -1 ) return pret(-2);
+
+	if( !(f = fopen(GOODS_NAME, "wb+")) )
+		return pret(-1);
+
+	bzero(&stgood, sizeof(stgood));
+	len = sizeof(struct goods);
+	for(i = 0; i < GOODS_MAX_COUNT * GOODS_HASH_COUNT; i++) fwrite(&stgood, 1, len, f);
+
+	fclose(f);
+	return 0;
+}
+
+int goods_extern_init()
+{
+	int i, len;
+	struct goods stgood;
+	FILE *f;
+	
+	if( access(GOODS_EXNAME, F_OK) != -1 ) return pret(-2);
+
+	if( !(f = fopen(GOODS_EXNAME, "wb+")) )
+		return pret(-1);
+
+	fclose(f);
+	return 0;
+}
+
+int goods_write_bak(struct goods *ptrGoods)
+{
+	int seek;
+	FILE *f;
+
+	if( !ptrGoods )
+		return pret(-5);
+
+	seek = atoi( ptrGoods->szEntry );
+	if( seek > GOODS_MAX_COUNT || seek < 0 )
+		return pret(-4);
+
+	if( !(f = fopen(GOODS_NAME, "rb+")) )
+	{
+		goods_init();
+		if( !(f = fopen(GOODS_NAME, "rb+")) )
+			return pret(-1);
+	}
+
+	seek *= sizeof(struct goods);
+
+	if( fseek(f, seek, SEEK_SET)  )
+	{
+		fclose(f);
+		return pret(-2);
+	}
+
+	if( fwrite(ptrGoods, 1, sizeof(struct goods), f) != sizeof(struct goods) )
+	{
+		fclose(f);
+		return pret(-3);
+	}
+
+	fclose(f);
+
+	return 0;
+}
+
+int goods_read_bak(struct goods *ptrGoods)
+{
+	unsigned int seek;
+	struct goods stgood;
+	FILE *f;
+
+	if( !ptrGoods )
+		return pret(-6);
+
+	seek = atoi( ptrGoods->szEntry );
+	if( seek > GOODS_MAX_COUNT || seek < 0 )
+		return pret(-5);
+
+	if( !(f = fopen(GOODS_NAME, "rb")) )
+		return pret(-1);
+
+	seek *= sizeof(stgood);
+
+	if( fseek(f, seek, SEEK_SET) )
+	{
+		fclose(f);
+		return pret(-2);
+	}
+
+	if( fread(&stgood, 1, sizeof(stgood), f) != sizeof(stgood) )
+	{
+		fclose(f);
+		return pret(-3);
+	}
+
+	fclose(f);
+
+	if( atoi( ptrGoods->szEntry ) * sizeof(stgood) != seek )
+		return pret(-4);
+
+	memcpy(ptrGoods, &stgood, sizeof(stgood));
+	goods_show(ptrGoods);
+	return 0;
+}
+
+int goods_extern_read(struct goods *pgood)
+{
+	struct goods good;	
+	FILE *pf;
+	
+	if( !(pf = fopen(GOODS_EXNAME, "rb")) )
+		return pret(-1);
+	
+	while( fread(&good, sizeof(good), 1, pf) == 1 )
+	{
+		if( !strcmp(good.szEntry, pgood->szEntry) )
+		{
+			memcpy(pgood, &good, sizeof(&good));
+			fclose(pf);
+			return 0;
+		}
+	}
+	
+	fclose(pf);
+	return pret(-2);
+}
+	
+
+
+int hash_read_search(FILE *pf, struct goods *pgood)
+{
+	struct goods good;
+	unsigned seek, i;
+
+	seek = (hash( pgood->szEntry ) % GOODS_MAX_COUNT) * sizeof(struct goods);
+
+	if( fseek(pf, seek, SEEK_SET)  )
+		return pret(-1);
+
+	for(i = 0; i < GOODS_HASH_COUNT; i++)
+	{
+		if( fread(&good, 1, sizeof(good), pf) != sizeof(struct goods) )
+			return pret(-2);
+
+		if( !strcmp(good.szEntry, pgood->szEntry) ) 
+		{
+			memcpy(pgood, &good, sizeof(good));
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+
+int goods_read(struct goods *ptrGoods)
+{
+	unsigned int seek;
+	struct goods stgood;
+	FILE *f;
+
+	if( !ptrGoods )
+		return pret(-6);
+
+	if( !(f = fopen(GOODS_NAME, "rb")) )
+		return pret(-1);
+
+	if( hash_read_search(f, ptrGoods) )
+	{
+		perr();
+		fclose(f);
+		return goods_extern_read(ptrGoods);
+	}
+
+	fclose(f);
+	return 0;
+}
+
+int goods_extern_write(struct goods *pgood)
+{
+	struct goods good;	
+	FILE *pf;
+	
+	if( !(pf = fopen(GOODS_EXNAME, "r+")) )
+	{
+		goods_extern_init();
+		
+		if( !(pf = fopen(GOODS_EXNAME, "r+")) )
+			return pret(-1);
+	}
+	
+	while( fread(&good, sizeof(struct goods), 1, pf) == 1 )
+	{
+		if( strcmp(good.szEntry, "") )
+			continue;
+		
+		if( fseek(pf, -sizeof(struct goods), SEEK_CUR) )
+		{
+			fclose(pf);
+			return pret(-2);
+		}
+		
+		if( fwrite(pgood, sizeof(struct goods), 1, pf) != 1 )
+		{
+			fclose(pf);
+			return pret(-3);
+		}
+		
+		fclose(pf);
+		return 0;
+	}
+	
+	if( fwrite(pgood, sizeof(struct goods), 1, pf) != 1 )
+	{
+		fclose(pf);
+		return pret(-4);
+	}
+	
+	fclose(pf);
+	return 0;
+}
+
+int hash_search_write(FILE *pf, struct goods *pgood)
+{
+	struct goods good;
+	unsigned seek, i;
+
+	seek = (hash( pgood->szEntry ) % GOODS_MAX_COUNT) * sizeof(struct goods);
+
+	if( fseek(pf, seek, SEEK_SET)  )
+		return pret(-1);
+
+	for(i = 0; i < GOODS_HASH_COUNT; i++)
+	{
+		if( fread(&good, sizeof(good), 1, pf) != 1 )
+			return pret(-2);
+
+		if( strcmp(good.szEntry, "") && !strcmp(pgood->szEntry, good.szEntry) ) continue;
+		
+		if( fseek(pf, -sizeof(good), SEEK_CUR ) )
+			return pret(-4);
+
+		if( fwrite(pgood, sizeof(struct goods), 1, pf) != 1 )
+			return pret(-3);
+
+		return 0;
+	}
+
+	return -4;
+}
+
+int goods_write(struct goods *ptrGoods)
+{
+	struct goods good;
+	unsigned seek;
+	FILE *f;
+
+	if( !ptrGoods )
+		return pret(-5);
+
+	if( !(f = fopen(GOODS_NAME, "rb+")) )
+	{
+		goods_init();
+		if( !(f = fopen(GOODS_NAME, "rb+")) )
+			return pret(-1);
+	}
+
+	if( hash_search_write(f, ptrGoods) )
+	{
+		perr();
+		fclose(f);
+		return goods_extern_write(ptrGoods);
+	}
+
+	fclose(f);
+
+	return 0;
+}
+
+int goods_extern_delete(struct goods *pgood)
+{
+	struct goods good;	
+	FILE *pf;
+	
+	if( !(pf = fopen(GOODS_EXNAME, "r+")) )
+		return pret(-1);
+
+	
+	while( fread(&good, sizeof(struct goods), 1, pf) == 1 )
+	{
+		if( strcmp(good.szEntry, pgood->szEntry) )
+			continue;
+		
+		if( fseek(pf, -sizeof(struct goods), SEEK_CUR) )
+		{
+			fclose(pf);
+			return pret(-2);
+		}
+		
+		bzero(&good, sizeof(good));
+		if( fwrite(&good, sizeof(good), 1, pf) != 1)
+		{
+			fclose(pf);
+			return pret(-3);
+		}
+		
+		fclose(pf);
+		return 0;
+	}
+	
+	fclose(pf);
+	return pret(-4);
+}
+
+int goods_delete(struct goods *ptrGoods)
+{
+	struct goods good;
+	unsigned seek;
+	FILE *f;
+
+	if( !ptrGoods )
+		return pret(-5);
+
+	seek = hash( ptrGoods->szEntry ) % GOODS_MAX_COUNT;
+
+	if( !(f = fopen(GOODS_NAME, "rb+")) )
+	{
+		goods_init();
+
+		if( !(f = fopen(GOODS_NAME, "rb+")) )
+			return pret(-1);
+	}
+
+	if( hash_read_search(f, ptrGoods) )
+	{
+		fclose(f);
+		return goods_extern_delete(ptrGoods);
+	}
+	
+	if( fseek(f, -sizeof(good), SEEK_CUR) )
+	{
+		fclose(f);
+		return pret(-6);
+	}
+	
+	if( fwrite(ptrGoods, sizeof(good), 1, f) != 1 )
+	{
+		fclose(f);
+		return pret(-7);
+	}
+
+	fclose(f);
+	return 0;
+}
+
+int goods_export(char *file)
+{
+	struct goods good;
+	FILE *pfin;
+	FILE *pfout;
+	
+	if( !(pfout = fopen(file, "w")) )
+		return pret(-1);
+	
+	if( !(pfin = fopen(GOODS_NAME, "r")) )
+	{
+		fclose(pfout);
+		return pret(-2);
+	}
+	
+	while( fread(&good, sizeof(good), 1, pfin) == 1 )
+	{
+		if( !strcmp(good.szName, "") ) continue;
+		
+		goods_show(&good);
+		fprintf(pfout, "%s\t%s\t%d\t%s\t%s\n", good.szEntry, good.szName, good.iPrice, good.szModel, good.szType);
+	}
+	
+	fclose(pfin);
+	
+	if( !(pfin = fopen(GOODS_EXNAME, "r")) )
+	{
+		fclose(pfout);
+		return 0;
+	}
+	
+	while( fread(&good, sizeof(good), 1, pfin) == 1 )
+	{
+		if( !strcmp(good.szName, "") ) continue;
+		
+		fprintf(pfout, "%s\t%s\t%d\t%s\t%s\n", good.szEntry, good.szName, good.iPrice, good.szModel, good.szType);
+	}
+	
+	fclose(pfin);
+	fclose(pfout);
+	
+	return 0;
+}
+
+int is_remark(char *p)
+{
+	while( isspace(*p) ) p++;
+	
+	return *p == '#';
+}
+
+int goods_import(char *file)
+{
+	struct goods good;
+	char *p;
+	size_t len;
+	FILE *pfout;
+	FILE *pfin;
+	
+	if( !(pfin = fopen(file, "r")) )
+		return pret(-1);
+	
+	if( !(pfout = fopen(GOODS_NAME, "r+")) )
+	{
+		fclose(pfin);
+		return pret(-2);
+	}
+	
+	while( getline(&p, &len, pfin) != -1 )
+	{
+		if( is_remark(p) )
+		{
+			free(p);
+			continue;
+		}
+		
+		sscanf(p, "%s%s%d%s%s", good.szEntry, good.szName, good.iPrice, good.szModel, good.szType);
+		
+		if( hash_search_write(pfin, &good) )
+		{
+			goods_extern_write(&good);
+		}
+		
+		free(p);
+	}
+	
+	fclose(pfin);
+	fclose(pfout);
+	
+	return 0;
+}

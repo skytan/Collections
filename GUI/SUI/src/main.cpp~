@@ -1,0 +1,47 @@
+#include "window_main.h"
+#include "mpm78m_printer.h"
+
+void p_data(char *str)
+{
+	for(int i = 0; str[i]; i++)
+	{
+		if( (i + 1) % 8 == 0 )
+		{
+			printf("0x%x\n", 0xff & str[i]);
+		}else
+		{
+			printf("0x%x:", 0xff & str[i]);
+		}
+	}
+	
+	printf("\n");
+}
+
+int main(int argc, char* argv[])
+{
+	char utf8[128] = {"机打号码"};
+	char gbk[128];
+	
+	
+	
+	utf8_to_gbk2312( (const char *)utf8, gbk);
+	
+	p_data( utf8 );
+	p_data( gbk );
+	
+	int i = 0;
+	
+	int printfd = open_printer_com();
+	if( printfd < 0 ) return -1;
+	
+	mpm78m_print_utf8(printfd, (unsigned char*)gbk);
+		
+	mpm78m_print_utf8(printfd, (unsigned char*)"机打号码:\n");
+	
+	mpm78m_print_str(printfd, (unsigned char*)"机器编号:");
+
+	mpm78m_print_str(printfd, (unsigned char*)"\n\n\n\n");
+	close_printer_com(printfd);
+	
+	create_main_window();
+}

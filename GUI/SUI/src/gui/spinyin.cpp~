@@ -1,0 +1,1404 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "spinyin.h"
+
+typedef struct
+{
+	char py[8];
+	char *str;
+}PY;
+
+//"拼音输入法汉字排列表"
+char PY_mb_a	[]={"阿啊腌嗄锕吖"};
+char PY_mb_ai	[]={"爱碍艾哀挨埃矮唉哎蔼癌隘霭暧嗳捱皑瑷嫒嗌锿砹"};
+char PY_mb_an	[]={"安案按暗岸俺鞍黯庵谙氨胺鹌铵桉犴埯揞"};
+char PY_mb_ang	[]={"昂肮盎"};
+char PY_mb_ao	[]={"奥傲澳熬凹敖懊袄拗鳌翱遨坳嗷鏖骜媪螯岙獒鏊聱廒"};
+char PY_mb_ba	[]={"把八巴吧罢拔爸霸叭坝跋芭扒靶疤笆耙粑灞钯捌魃岜鲅菝茇"};
+char PY_mb_bai	[]={"白百败摆拜柏掰佰稗捭"};
+char PY_mb_ban	[]={"办半般板班伴版搬扮斑瓣颁扳绊拌坂阪瘢舨钣癍"};
+char PY_mb_bang	[]={"帮邦棒绑膀榜傍磅谤镑蚌梆浜蒡"};
+char PY_mb_bao	[]={"报保包宝抱暴薄饱爆炮堡胞剥鲍豹瀑苞曝雹褒葆鸨褓孢煲趵龅勹"};
+char PY_mb_bei	[]={"被北备背杯辈贝悲倍碑卑狈惫悖蓓呗焙陂钡孛碚褙鹎鞴鐾邶"};
+char PY_mb_ben	[]={"本奔笨苯夯畚坌锛"};
+char PY_mb_beng	[]={"崩迸绷蹦甭蚌泵嘣甏"};
+char PY_mb_bian	[]={"便变边遍编辩辨鞭扁贬辫匾卞蝙汴弁砭笾褊忭鳊窆苄缏煸碥"};
+char PY_mb_biao	[]={"表标镖彪飙膘婊飚裱镳骠鳔飑瘭"};
+char PY_mb_bie	[]={"别憋鳖瘪蹩"};
+char PY_mb_bi	[]={"比必笔毕避闭彼壁臂逼鼻碧币辟蔽弊鄙毙陛璧庇敝婢匕弼痹裨贲俾愎毖睥篦哔蓖薜嬖跸荜芘髀妣铋筚吡畀荸秕庳狴濞襞萆箅滗舭"};
+char PY_mb_bin	[]={"宾滨彬斌鬓殡濒缤槟摈傧玢膑镔豳髌"};
+char PY_mb_bing	[]={"并病兵冰屏饼柄秉丙禀炳摒槟邴"};
+char PY_mb_bo	[]={"波伯博薄播拨柏勃卜玻剥泊驳搏脖膊舶簸钵帛跛渤钹箔礴菠饽擘亳铂啵踣鹁檗"};
+char PY_mb_bu	[]={"不部步布补捕卜怖簿哺埠埔钚逋卟瓿晡钸醭"};
+char PY_mb_ca	[]={"擦嚓礤"};
+char PY_mb_cai	[]={"才采财彩菜材裁猜蔡踩睬"};
+char PY_mb_can	[]={"参残餐惨灿惭蚕璨粲孱骖黪"};
+char PY_mb_cang	[]={"藏苍仓舱沧伧"};
+char PY_mb_cao	[]={"草操曹槽糙嘈漕螬艚"};
+char PY_mb_ce	[]={"策测侧册厕恻"};
+char PY_mb_cen	[]={"参岑涔"};
+char PY_mb_ceng	[]={"曾层蹭噌"};
+char PY_mb_cha	[]={"查差察茶插叉刹诧岔喳茬嚓搽碴姹楂杈汊衩槎馇锸檫镲猹"};
+char PY_mb_chai	[]={"差拆柴钗豺侪虿瘥"};
+char PY_mb_chan	[]={"产缠颤禅阐蝉铲搀掺忏潺馋蟾婵谄谗孱廛觇羼澶躔骣蒇冁"};
+char PY_mb_chang	[]={"长常场厂唱尝昌偿畅肠敞倡裳怅娼猖嫦昶氅徜伥阊菖苌鬯惝鲳"};
+char PY_mb_chao	[]={"朝超潮吵抄嘲钞巢炒绰剿晁焯耖怊"};
+char PY_mb_che	[]={"车彻撤扯澈掣坼砗"};
+char PY_mb_chen	[]={"称陈沉沈臣晨尘辰趁衬琛忱嗔宸郴谌碜谶抻榇龀"};
+char PY_mb_cheng	[]={"成城程称承乘诚呈撑惩澄逞丞秤橙骋瞠铛枨裎铖塍埕柽酲蛏"};
+char PY_mb_chi	[]={"持吃迟尺池赤痴驰齿斥耻匙翅炽叱弛侈嗤哧啻敕饬笞墀蚩鸱魑踟茌篪螭豉褫媸彳眵瘛傺"};
+char PY_mb_chong	[]={"重冲充崇虫宠忡憧舂铳艟茺"};
+char PY_mb_chou	[]={"抽仇愁丑筹臭酬绸瞅畴踌稠惆俦雠瘳帱"};
+char PY_mb_chu	[]={"出处除初楚触础储厨畜雏橱躇褚矗锄搐刍杵怵绌黜滁蜍蹰楮樗亍憷"};
+char PY_mb_chuai	[]={"揣啜踹嘬膪搋"};
+char PY_mb_chuan	[]={"传穿船川串喘椽钏舛遄舡氚"};
+char PY_mb_chuang	[]={"窗床创闯幢疮怆"};
+char PY_mb_chui	[]={"吹垂锤椎捶炊槌陲棰"};
+char PY_mb_chun	[]={"春纯唇蠢淳醇椿鹑莼蝽"};
+char PY_mb_chuo	[]={"戳绰辍啜龊踔"};
+char PY_mb_ci	[]={"此次差词刺辞慈赐磁瓷茨祠雌疵鹚糍茈"};
+char PY_mb_cong	[]={"从匆聪丛葱囱琮淙骢枞苁璁"};
+char PY_mb_cou	[]={"凑辏腠楱"};
+char PY_mb_cu	[]={"促粗簇卒醋猝蹙蹴酢殂徂蔟"};
+char PY_mb_cuan	[]={"窜攒篡蹿撺爨汆镩"};
+char PY_mb_cui	[]={"翠崔衰催脆粹摧萃悴璀瘁啐淬毳榱"};
+char PY_mb_cun	[]={"存村寸忖皴"};
+char PY_mb_cuo	[]={"错措挫磋搓撮蹉锉厝嵯痤矬瘥鹾脞"};
+char PY_mb_da	[]={"大打达答搭瘩沓嗒妲哒鞑耷靼褡怛笪"};
+char PY_mb_dai	[]={"代带待戴袋呆歹贷黛逮殆怠岱傣玳迨埭绐呔甙"};
+char PY_mb_dan	[]={"但单石担弹淡丹胆旦蛋诞耽惮氮宕眈郸掸澹啖殚聃疸箪儋菪萏凼赕瘅"};
+char PY_mb_dang	[]={"当党荡挡档铛裆砀谠"};
+char PY_mb_dao	[]={"到道倒导刀岛盗蹈稻祷捣悼叨焘纛氘"};
+char PY_mb_de	[]={"的地得德锝"};
+char PY_mb_deng	[]={"等登灯邓瞪凳蹬镫噔磴簦嶝戥"};
+char PY_mb_di	[]={"的地第低底弟帝敌抵递蒂滴迪堤狄笛涤缔邸翟棣嘀谛嫡娣荻砥祗诋睇柢镝坻氐觌籴碲羝骶"};
+char PY_mb_dia	[]={"嗲"};
+char PY_mb_dian	[]={"点电店典殿颠垫奠甸惦淀滇巅癫玷掂碘佃钿踮靛簟癜坫阽"};
+char PY_mb_diao	[]={"调掉吊雕钓刁凋貂叼碉鲷铞"};
+char PY_mb_die	[]={"跌爹叠蝶迭碟谍喋牒耋堞鲽垤揲瓞"};
+char PY_mb_ding	[]={"定顶丁订盯鼎钉叮锭町仃酊碇腚玎疔啶耵"};
+char PY_mb_diu	[]={"丢铥"};
+char PY_mb_dong	[]={"动东洞懂冬董冻栋咚侗恫峒胴鸫硐氡垌胨岽"};
+char PY_mb_dou	[]={"都斗抖豆逗陡兜窦痘蚪蔸钭篼"};
+char PY_mb_du	[]={"都度独读毒杜督渡肚赌堵睹妒笃嘟渎镀犊牍蠹髑黩椟芏"};
+char PY_mb_duan	[]={"断段端短缎锻煅椴簖"};
+char PY_mb_dui	[]={"对队堆敦兑碓怼镦憝"};
+char PY_mb_dun	[]={"顿盾敦蹲吨遁钝沌墩盹炖囤趸礅砘"};
+char PY_mb_duo	[]={"多度夺朵躲堕哆踱咄铎舵惰跺垛掇剁裰缍哚沲"};
+char PY_mb_e	[]={"阿恶额俄饿哦厄鹅愕娥遏峨扼鄂噩蛾讹呃鳄萼婀颚鹗轭锷谔垩腭莪屙锇苊"};
+char PY_mb_ei	[]={"诶"};
+char PY_mb_en	[]={"恩嗯摁蒽"};
+char PY_mb_er	[]={"而二儿尔耳饵贰迩洱珥铒鸸鲕"};
+char PY_mb_fa	[]={"发法罚乏伐阀筏砝珐垡"};
+char PY_mb_fan	[]={"反饭范翻犯凡烦番泛返繁贩帆樊藩梵蕃幡矾钒燔畈蘩蹯攵夂"};
+char PY_mb_fang	[]={"方放房防访芳仿妨坊纺舫肪邡枋鲂钫"};
+char PY_mb_fei	[]={"非飞费废肥菲匪啡肺沸妃斐扉翡霏绯吠诽蜚狒悱腓淝芾痱篚鲱榧镄砩"};
+char PY_mb_fen	[]={"分份纷奋粉愤芬氛坟吩焚粪忿汾偾酚棼鼢鲼瀵"};
+char PY_mb_feng	[]={"风封丰峰凤奉锋疯冯逢缝蜂枫讽烽俸酆沣葑唪砜"};
+char PY_mb_fo	[]={"佛"};
+char PY_mb_fou	[]={"否缶"};
+char PY_mb_fu	[]={"服夫复父府负福副富妇付附扶符浮幅伏傅覆抚赴腐赋腹甫肤辅弗咐俯拂芙缚敷斧袱俘辐脯腑阜孚蝠氟馥釜孵讣匐莆涪驸凫茯蜉拊罘怫绂苻蚨芾趺麸郛跗蝮黼黻滏鲋桴呋绋祓莩呒幞赙菔鳆艴稃"};
+char PY_mb_ga	[]={"夹尬嘎轧噶尕垓旮钆尜"};
+char PY_mb_gai	[]={"该改盖概丐溉芥钙赅陔戤"};
+char PY_mb_gan	[]={"感干敢赶甘杆肝尴竿柑橄赣秆淦擀矸酐绀泔旰苷疳坩澉"};
+char PY_mb_gang	[]={"刚港钢岗冈纲缸杠罡肛戆筻"};
+char PY_mb_gao	[]={"高告搞稿糕膏皋羔镐槁诰篙郜睾缟杲藁锆槔"};
+char PY_mb_gei	[]={"给"};
+char PY_mb_ge	[]={"个合各格哥歌革隔割阁葛戈搁胳鸽咯疙蛤骼铬颌舸嗝仡纥圪膈硌鬲镉搿袼虼塥哿"};
+char PY_mb_gen	[]={"根跟亘艮哏茛"};
+char PY_mb_geng	[]={"更耕耿梗庚羹哽埂赓鲠绠"};
+char PY_mb_gong	[]={"公工功共供宫攻贡恭弓躬拱龚巩蚣觥肱汞珙"};
+char PY_mb_gou	[]={"够构狗勾购沟钩苟垢篝佝彀诟媾枸缑笱觏遘岣鞲"};
+char PY_mb_gu	[]={"告故古顾股骨姑鼓固谷孤贾估雇辜咕箍沽蛊菇汩鹄锢梏鸪痼毂诂鹘瞽牯崮钴觚轱罟菰嘏蛄酤臌鲴牿"};
+char PY_mb_gua	[]={"挂瓜寡刮卦褂呱剐鸹诖栝胍"};
+char PY_mb_guai	[]={"怪拐乖掴"};
+char PY_mb_guan	[]={"关管观官馆惯冠贯灌棺罐纶莞矜倌盥鹳掼鳏涫"};
+char PY_mb_guang	[]={"光广逛犷胱咣桄"};
+char PY_mb_gui	[]={"规贵归鬼柜桂跪轨瑰龟诡闺圭硅刽桧癸皈鲑晷妫簋鳜宄刿匦炅庋"};
+char PY_mb_gun	[]={"滚棍衮辊鲧磙绲"};
+char PY_mb_guo	[]={"过国果郭裹锅帼聒虢椁掴蝈猓埚蜾呙崞馘"};
+char PY_mb_ha	[]={"哈蛤铪"};
+char PY_mb_hai	[]={"还海孩害骇骸亥嗨氦醢胲"};
+char PY_mb_han	[]={"汉含寒韩喊汗函涵翰憾罕旱撼悍酣憨瀚颔捍邯焊鼾阚菡邗晗焓蚶犴顸撖"};
+char PY_mb_hang	[]={"行航杭吭夯沆绗颃"};
+char PY_mb_hao	[]={"好号毫豪浩耗郝皓昊嚎壕蒿灏嗥颢濠貉蚝薅嚆"};
+char PY_mb_he	[]={"和何合河喝荷贺核赫呵盒鹤禾褐壑阖诃阂涸劾颌嗬菏貉盍曷翮蚵"};
+char PY_mb_hei	[]={"黑嘿"};
+char PY_mb_hen	[]={"很恨狠痕"};
+char PY_mb_heng	[]={"横衡恒哼亨珩蘅桁"};
+char PY_mb_hong	[]={"红洪宏鸿轰虹哄弘烘泓闳訇讧薨蕻荭黉"};
+char PY_mb_hou	[]={"后候厚侯喉吼猴後逅篌鲎堠骺糇瘊"};
+char PY_mb_hu	[]={"和乎护户呼胡忽湖互虎糊狐壶弧葫蝴唬惚瑚沪琥扈鹄浒斛囫猢祜鹘笏唿醐怙滹瓠鹕觳煳戽槲烀鹱轷岵冱"};
+char PY_mb_hua	[]={"话化花华画划滑哗猾桦骅铧砉"};
+char PY_mb_huai	[]={"怀坏淮徊槐踝"};
+char PY_mb_huan	[]={"还欢换环缓唤患幻桓焕寰宦痪浣涣鬟豢圜奂獾洹郇漶逭萑缳擐锾鲩"};
+char PY_mb_huang	[]={"黄皇荒慌晃煌惶恍谎凰簧幌蝗徨璜潢隍遑磺篁湟肓蟥鳇癀"};
+char PY_mb_hui	[]={"会回挥灰惠恢辉慧毁汇悔绘徽秽晖贿讳晦卉蕙诲荟麾诙彗桧蛔喙茴烩恚洄虺珲隳咴蟪缋"};
+char PY_mb_hun	[]={"混婚魂昏浑荤馄诨阍珲溷"};
+char PY_mb_huo	[]={"和活或火获伙货惑祸霍豁夥镬藿嚯蠖锪钬耠攉劐"};
+char PY_mb_ji	[]={"给几机己及记计即系极集急既际纪继基击济激级技积吉迹季疾寄鸡骑挤寂籍忌绩辑祭脊肌饥稽姬剂妓圾冀藉嫉棘缉汲讥亟羁戟悸叽矶骥暨畸嵇伎稷蓟跻髻唧箕瘠霁玑岌笈鲫觊楫屐畿犄咭偈佶荠赍笄乩麂殛蒺戢芨齑洎芰掎跽哜虮墼鲚蕺嵴剞"};
+char PY_mb_jia	[]={"家加假价架佳甲夹驾嘉嫁贾颊稼茄迦伽枷戛袈钾浃荚珈笳胛痂葭镓岬郏蛱恝铗跏瘕"};
+char PY_mb_jian	[]={"间见件建简渐坚监检剑健减肩尖兼箭鉴艰剪键践奸荐贱舰捡拣俭柬槛煎溅涧笺歼茧谏饯缄碱睑翦锏蹇戬菅僭謇毽腱硷缣鞯犍囝蒹裥笕湔楗枧戋鲣搛谫踺牮"};
+char PY_mb_jiang	[]={"将强江讲降奖姜疆蒋僵匠浆酱绛桨缰靓犟豇洚茳耩糨礓"};
+char PY_mb_jiao	[]={"教交叫较角脚校焦轿娇郊骄胶缴绞搅狡浇嚼矫椒窖蕉侥剿礁跤佼皎蛟饺姣酵铰峤醮徼鲛挢湫茭鹪噍僬艽敫"};
+char PY_mb_jie	[]={"接解结界节姐介借街阶杰洁皆截戒揭捷劫届竭藉诫睫桔芥嗟桀诘婕秸颉拮孑碣讦疥羯疖喈蚧骱鲒"};
+char PY_mb_jin	[]={"进今金近尽紧仅禁劲津锦斤谨晋巾筋浸襟瑾靳矜烬噤觐缙堇荩衿槿馑妗卺赆廑"};
+char PY_mb_jing	[]={"经精京静竟惊境景警睛敬径镜净竞井晶颈荆靖兢阱茎菁鲸憬旌痉胫泾迳儆腈粳婧箐獍肼刭弪"};
+char PY_mb_jiong	[]={"炯窘迥扃"};
+char PY_mb_jiu	[]={"就九究久酒旧救纠舅揪咎疚鸠臼玖厩啾灸柩赳韭鹫阄桕僦鬏"};
+char PY_mb_ju	[]={"车且据举具句居局巨剧聚拒距俱惧矩菊拘鞠炬锯沮驹橘踞咀掬遽飓狙疽钜倨趄莒裾踽枸讵龃琚苴榉苣椐屦雎鞫榘窭醵锔犋"};
+char PY_mb_juan	[]={"卷捐倦眷娟绢鹃隽镌涓狷蠲鄄锩桊"};
+char PY_mb_jue	[]={"决觉绝掘爵诀嚼厥倔崛攫抉珏獗蹶撅谲噘矍噱蕨橛桷镢孓爝觖劂"};
+char PY_mb_jun	[]={"军君均俊峻钧郡骏菌浚筠竣皲麇捃"};
+char PY_mb_ka	[]={"卡咖喀咯咔胩佧"};
+char PY_mb_kai	[]={"开凯慨楷恺揩铠忾锴剀锎垲蒈"};
+char PY_mb_kan	[]={"看刊堪砍坎勘侃槛瞰龛阚戡莰"};
+char PY_mb_kang	[]={"康抗扛慷炕亢糠伉钪闶"};
+char PY_mb_kao	[]={"考靠烤拷铐犒尻栲"};
+char PY_mb_ke	[]={"可客刻克科课颗渴棵柯咳壳磕苛珂恪坷瞌嗑窠轲蝌颏稞溘疴锞岢髁骒缂氪钶"};
+char PY_mb_ken	[]={"肯恳啃垦龈裉"};
+char PY_mb_keng	[]={"坑吭铿"};
+char PY_mb_kong	[]={"空恐孔控崆倥箜"};
+char PY_mb_kou	[]={"口扣寇叩抠蔻芤筘眍"};
+char PY_mb_ku	[]={"苦库哭酷裤枯窟骷绔堀刳喾"};
+char PY_mb_kua	[]={"跨夸垮胯挎侉"};
+char PY_mb_kuai	[]={"会快块筷脍侩蒯狯哙浍郐"};
+char PY_mb_kuan	[]={"宽款髋"};
+char PY_mb_kuang	[]={"况狂矿框旷眶匡筐邝诳诓哐圹贶纩夼"};
+char PY_mb_kui	[]={"亏愧魁溃窥奎馈盔葵匮睽逵喟傀揆夔篑隗聩馗岿暌愦跬蝰喹蒉悝"};
+char PY_mb_kun	[]={"困昆捆坤琨鲲锟阃髡悃醌"};
+char PY_mb_kuo	[]={"括阔扩廓蛞"};
+char PY_mb_la	[]={"落拉啦腊辣蜡喇垃剌邋旯瘌砬"};
+char PY_mb_lai	[]={"来赖莱睐籁癞濑徕赉崃涞铼"};
+char PY_mb_lan	[]={"兰蓝览栏烂拦懒篮滥揽岚缆澜婪阑榄斓褴谰镧罱漤"};
+char PY_mb_lang	[]={"浪郎朗狼廊琅螂啷榔阆蒗稂"};
+char PY_mb_lao	[]={"老劳牢捞姥烙潦唠佬涝酪痨崂醪栳忉铹铑耢"};
+char PY_mb_le	[]={"了乐勒叻泐鳓仂"};
+char PY_mb_lei	[]={"类雷累泪蕾垒磊擂肋儡羸镭耒嘞缧酹诔檑嫘"};
+char PY_mb_leng	[]={"冷愣楞棱塄"};
+char PY_mb_li	[]={"里理力立利李离历礼丽例厉黎励璃粒哩隶莉栗梨吏狸漓厘篱俐沥犁荔笠鲤雳砾藜罹戾痢俪骊砺莅鹂蠡俚澧醴锂郦逦傈唳娌溧蛎黧枥栎詈疠呖蜊喱嫠粝坜猁缡轹疬蓠鲡篥膦鳢跞苈"};
+char PY_mb_lia	[]={"俩"};
+char PY_mb_lian	[]={"连脸联练莲怜恋廉炼链帘敛涟琏镰殓濂蠊奁裢潋楝鲢臁裣蔹"};
+char PY_mb_liang	[]={"两量良亮梁辆凉粮俩谅踉粱晾靓魉椋锒莨墚"};
+char PY_mb_liao	[]={"了料聊疗辽廖寥僚撩缭潦燎撂镣嘹寮獠蓼鹩尥钌"};
+char PY_mb_lie	[]={"列烈裂劣猎咧冽趔洌鬣捩埒躐"};
+char PY_mb_lin	[]={"林临邻琳淋麟凛霖鳞赁磷吝拎粼躏蔺嶙遴廪辚懔檩瞵啉"};
+char PY_mb_ling	[]={"领令另灵零凌龄陵铃岭玲菱伶聆翎绫苓泠羚囹棂瓴蛉呤酃鲮柃"};
+char PY_mb_liu	[]={"流留六刘柳溜浏瘤琉榴硫绺馏遛骝鎏旒镏熘鹨锍"};
+char PY_mb_lo	[]={"咯"};
+char PY_mb_long	[]={"龙隆笼拢聋胧珑咙陇垄窿茏泷垅栊砻癃"};
+char PY_mb_lou	[]={"楼露漏陋搂娄喽篓髅镂偻蝼瘘耧嵝蒌"};
+char PY_mb_lu	[]={"路露陆鲁录卢炉鹿禄芦碌庐虏赂颅戮噜麓卤璐鹭掳漉辘泸橹潞辂鲈轳渌逯撸胪鸬垆簏栌舻镥氇"};
+char PY_mb_luan	[]={"乱卵鸾峦挛栾銮孪滦脔娈"};
+char PY_mb_lue	[]={"略掠锊"};
+char PY_mb_lun	[]={"论轮伦仑沦纶抡囵"};
+char PY_mb_luo	[]={"落罗洛络骆逻裸萝螺锣咯烙骡珞箩摞雒漯猡荦蠃椤镙泺倮瘰跞脶"};
+char PY_mb_lv	[]={"律率绿虑旅吕履屡缕侣驴滤铝褛氯闾捋偻榈膂稆"};
+char PY_mb_m	[]={"呒"};
+char PY_mb_ma	[]={"马吗妈麻码骂嘛抹玛蚂麽蟆唛犸杩"};
+char PY_mb_mai	[]={"买卖麦埋迈脉霾劢荬"};
+char PY_mb_man	[]={"满慢漫曼蛮瞒蔓馒幔谩鳗缦螨颟墁熳镘鞔"};
+char PY_mb_mang	[]={"忙茫芒盲莽氓蟒邙漭硭"};
+char PY_mb_mao	[]={"毛冒貌矛帽猫贸茂茅髦卯锚懋瑁耄袤铆牦旄峁茆瞀昴蟊蝥泖"};
+char PY_mb_me	[]={"么麽"};
+char PY_mb_mei	[]={"没美每梅妹眉媒枚媚煤魅玫昧霉楣寐袂糜湄莓嵋镁酶浼镅鹛猸"};
+char PY_mb_men	[]={"们门闷扪懑焖钔"};
+char PY_mb_meng	[]={"梦蒙猛孟盟萌朦檬懵虻蜢锰勐蠓甍瞢艋艨礞"};
+char PY_mb_mi	[]={"密米秘迷弥蜜觅谜靡眯泌咪谧糜宓麋汨猕弭幂醚縻祢敉脒芈嘧"};
+char PY_mb_mian	[]={"面免勉棉眠绵缅冕腼娩湎渑沔眄"};
+char PY_mb_miao	[]={"妙描庙苗秒瞄渺缪藐缈淼邈眇喵杪鹋"};
+char PY_mb_mie	[]={"灭蔑篾咩乜蠛"};
+char PY_mb_min	[]={"民敏悯闽闵皿抿泯珉岷玟愍缗黾苠鳘"};
+char PY_mb_ming	[]={"明名命鸣铭冥茗瞑溟酩螟暝"};
+char PY_mb_miu	[]={"谬缪"};
+char PY_mb_mo	[]={"没模莫默摸末摩魔磨墨漠脉抹陌寞膜沫蓦摹麽茉嬷蘑谟馍殁秣嫫瘼貊镆耱貘"};
+char PY_mb_mou	[]={"某谋眸牟缪哞侔鍪蛑"};
+char PY_mb_mu	[]={"目母木幕慕牧穆姆墓亩暮牟沐牡募睦拇苜钼仫毪坶"};
+char PY_mb_na	[]={"那拿哪纳娜呐捺讷钠衲肭镎"};
+char PY_mb_nai	[]={"乃奶奈耐氖柰鼐萘艿佴"};
+char PY_mb_nang	[]={"囊囔曩馕攮"};
+char PY_mb_nan	[]={"难南男喃楠囡赧囝腩蝻"};
+char PY_mb_nao	[]={"脑闹恼挠瑙淖呶孬铙猱垴蛲硇"};
+char PY_mb_ne	[]={"呢讷"};
+char PY_mb_nei	[]={"内馁"};
+char PY_mb_nen	[]={"嫩恁"};
+char PY_mb_neng	[]={"能"};
+char PY_mb_ni	[]={"你尼泥拟逆妮倪腻匿霓溺昵睨旎怩鲵坭猊铌伲蘼"};
+char PY_mb_nian	[]={"年念粘拈捻廿碾撵黏辇鲶蔫鲇埝"};
+char PY_mb_niang	[]={"娘酿"};
+char PY_mb_niao	[]={"鸟尿袅脲茑嬲"};
+char PY_mb_nie	[]={"捏聂孽涅蹑啮嗫臬镍乜蘖镊颞陧"};
+char PY_mb_nin	[]={"您"};
+char PY_mb_ning	[]={"宁凝拧狞咛泞柠佞甯聍"};
+char PY_mb_niu	[]={"牛扭纽钮妞拗忸狃"};
+char PY_mb_nong	[]={"农弄浓哝脓侬"};
+char PY_mb_nou	[]={"耨"};
+char PY_mb_nu	[]={"怒努奴弩驽孥胬"};
+char PY_mb_nuan	[]={"暖"};
+char PY_mb_nue	[]={"挪虐疟"};
+char PY_mb_nuo	[]={"诺娜懦喏糯傩搦锘"};
+char PY_mb_nv	[]={"女钕衄恧"};
+char PY_mb_o	[]={"哦噢"};
+char PY_mb_ou	[]={"欧偶呕殴鸥藕讴耦怄瓯沤"};
+char PY_mb_pa	[]={"怕爬帕趴扒琶啪耙葩杷筢"};
+char PY_mb_pai	[]={"派排牌拍徘湃俳哌蒎"};
+char PY_mb_pan	[]={"盘判胖盼潘攀叛畔拚磐蟠蹒爿泮袢襻"};
+char PY_mb_pang	[]={"旁庞胖乓彷磅螃滂逄耪攵夂"};
+char PY_mb_pao	[]={"跑炮抛袍泡咆刨庖疱狍匏脬"};
+char PY_mb_pei	[]={"配陪佩培赔裴沛胚呸辔霈帔旆醅锫"};
+char PY_mb_pen	[]={"喷盆湓"};
+char PY_mb_peng	[]={"朋碰捧鹏蓬彭棚篷膨烹砰澎怦抨嘭硼蟛堋"};
+char PY_mb_pi	[]={"被否皮批匹披疲辟脾劈僻屁譬啤琵霹毗坯丕癖媲痞砒噼枇纰邳疋圮罴芘鼙淠貔仳埤郫铍蚍陴蜱甓擗庀"};
+char PY_mb_pian	[]={"便片偏篇骗翩骈胼谝蹁犏"};
+char PY_mb_piao	[]={"票飘漂瓢嫖瞟缥剽殍莩嘌螵"};
+char PY_mb_pie	[]={"瞥撇苤彡氕丿"};
+char PY_mb_pin	[]={"品贫频拼聘颦嫔姘牝榀"};
+char PY_mb_ping	[]={"平评凭瓶屏冯萍苹坪乒娉枰俜鲆"};
+char PY_mb_pou	[]={"剖掊裒"};
+char PY_mb_po	[]={"破迫婆颇坡泼魄珀鄱叵粕皤笸钷钋"};
+char PY_mb_pu	[]={"普暴扑铺仆朴谱浦葡蒲菩瀑圃曝璞埔噗濮溥匍莆蹼镨镤氆"};
+char PY_mb_puo	[]={"掊"};
+char PY_mb_qi	[]={"其起气期七奇器齐妻弃启企旗骑欺棋岂汽戚乞契泣漆凄琪歧祈绮栖祁砌琦缉迄崎淇岐麒俟祺憩脐杞沏讫颀耆畦圻萋綦蕲鳍葺嘁骐柒碛槭萁蛴屺芪亓汔芑桤蜞"};
+char PY_mb_qia	[]={"恰夹洽掐袷髂葜"};
+char PY_mb_qian	[]={"前钱千签潜迁牵纤欠浅谦遣乾歉嵌铅倩虔谴茜钳黔骞堑仟芊钤掮佥阡箝愆缱扦搴悭钎荨慊椠芡褰岍肷"};
+char PY_mb_qiang	[]={"将强墙抢枪腔蔷呛跄锵羌襁戕嫱樯镪戗羟炝蜣锖"};
+char PY_mb_qiao	[]={"巧桥瞧悄乔敲削壳俏侨窍翘樵峭憔跷鞘撬锹荞橇诮峤谯愀硗鞒劁缲"};
+char PY_mb_qie	[]={"且切窃怯妾茄惬锲挈箧趄郄慊"};
+char PY_mb_qin	[]={"亲秦琴勤侵钦禽寝擒沁芹矜覃噙衾揿螓嗪溱芩锓檎吣"};
+char PY_mb_qing	[]={"情清请轻青庆倾卿晴顷擎氢蜻磬罄氰鲭綮黥苘檠謦圊"};
+char PY_mb_qiong	[]={"穷琼穹邛茕蛩跫筇銎"};
+char PY_mb_qiu	[]={"求秋球丘邱囚裘酋虬泅蚯鳅遒糗湫逑俅楸犰蝤鼽赇巯"};
+char PY_mb_qu	[]={"去取区曲趣屈驱趋躯娶渠瞿觑衢岖祛蛆蛐阒龋癯蘧蕖苣诎朐劬黢璩鸲麴蠼磲氍"};
+char PY_mb_quan	[]={"全权圈泉劝拳券犬痊蜷铨诠荃颧绻鬈醛犭筌悛畎辁"};
+char PY_mb_que	[]={"却确缺雀阙鹊瘸榷阕炔悫"};
+char PY_mb_qun	[]={"群裙逡麇"};
+char PY_mb_ran	[]={"然染燃冉髯苒蚺"};
+char PY_mb_rang	[]={"让嚷壤攘穰瓤禳"};
+char PY_mb_rao	[]={"绕扰饶娆桡荛"};
+char PY_mb_re	[]={"热惹喏"};
+char PY_mb_ren	[]={"人任认仁忍刃韧纫仞壬饪稔荏妊衽轫"};
+char PY_mb_reng	[]={"仍扔"};
+char PY_mb_ri	[]={"日"};
+char PY_mb_rong	[]={"容荣融蓉溶绒戎冗熔茸榕嵘狨蝾肜"};
+char PY_mb_rou	[]={"肉柔揉蹂糅鞣"};
+char PY_mb_ru	[]={"如入辱汝儒乳茹孺褥蠕濡嚅缛襦溽蓐铷颥洳薷"};
+char PY_mb_ruan	[]={"软阮朊"};
+char PY_mb_rui	[]={"瑞锐蕊睿芮蚋蕤枘"};
+char PY_mb_run	[]={"润闰"};
+char PY_mb_ruo	[]={"若弱偌箬"};
+char PY_mb_sa	[]={"萨撒洒飒卅挲脎"};
+char PY_mb_sai	[]={"塞赛腮噻鳃"};
+char PY_mb_san	[]={"三散伞叁仨糁毵馓彡"};
+char PY_mb_sang	[]={"丧桑嗓搡颡磉"};
+char PY_mb_sao	[]={"扫嫂骚搔臊缫埽瘙鳋"};
+char PY_mb_se	[]={"色塞瑟涩啬穑铯"};
+char PY_mb_sen	[]={"森"};
+char PY_mb_seng	[]={"僧"};
+char PY_mb_sha	[]={"杀沙傻纱刹莎厦煞啥砂霎鲨裟挲铩痧歃唼"};
+char PY_mb_shai	[]={"晒筛酾"};
+char PY_mb_shan	[]={"山善闪扇衫珊擅删陕栅杉膳讪姗煽汕赡跚缮潸膻嬗鳝舢苫剡鄯蟮芟钐疝骟埏"};
+char PY_mb_shang	[]={"上商伤尚赏晌裳觞熵墒殇泷垧绱"};
+char PY_mb_shao	[]={"少绍烧稍邵哨梢韶勺捎鞘劭芍杓艄苕筲潲蛸"};
+char PY_mb_she	[]={"设社射舍涉摄蛇舌奢赦慑赊麝佘歙畲厍猞揲滠"};
+char PY_mb_shen	[]={"身神什深甚参伸审沈申慎渗绅婶呻肾莘砷蜃哂娠椹糁葚诜渖矧谂胂"};
+char PY_mb_sheng	[]={"生声省胜圣升盛乘剩牲绳笙甥晟渑嵊眚"};
+char PY_mb_shi	[]={"是时事实十使世什师士识视失始石式示势市试史室施适食诗释氏拾饰尸湿誓驶逝侍矢狮匙蚀仕嘘拭嗜噬恃柿屎虱轼舐豕弑螫谥蓍筮莳鲥礻贳埘炻铈鲺"};
+char PY_mb_shou	[]={"手受收首守授寿瘦售兽狩绶艏"};
+char PY_mb_shu	[]={"数书术树属束熟述输舒殊叔疏署鼠淑竖梳恕暑俞蔬曙蜀枢抒孰庶倏墅赎漱薯戍黍塾姝纾澍沭菽殳秫毹摅腧"};
+char PY_mb_shua	[]={"刷耍唰"};
+char PY_mb_shuai	[]={"率衰帅摔甩蟀"};
+char PY_mb_shuan	[]={"拴栓闩涮"};
+char PY_mb_shuang	[]={"双霜爽孀"};
+char PY_mb_shui	[]={"说水谁睡税"};
+char PY_mb_shun	[]={"顺瞬舜吮"};
+char PY_mb_shuo	[]={"说数硕烁朔铄槊妁搠蒴"};
+char PY_mb_si	[]={"四思死司似斯食丝私寺伺肆撕厮嘶饲嗣巳祀俟泗驷咝鸶姒汜蛳笥澌兕耜锶缌厶"};
+char PY_mb_song	[]={"送松宋耸诵颂讼嵩悚怂淞忪崧竦凇菘"};
+char PY_mb_sou	[]={"搜艘嗽叟飕擞嗖馊薮嗾瞍溲锼螋"};
+char PY_mb_su	[]={"诉速素苏缩俗宿肃塑溯粟酥夙簌稣愫谡僳蔌涑嗉觫"};
+char PY_mb_suan	[]={"算酸蒜狻"};
+char PY_mb_sui	[]={"随虽岁碎遂髓隋隧穗祟绥邃睢燧眭濉谇荽"};
+char PY_mb_sun	[]={"孙损笋荪隼狲榫飧"};
+char PY_mb_suo	[]={"所索缩锁莎琐梭嗦唆娑蓑挲唢睃桫嗍羧"};
+char PY_mb_ta	[]={"他它她塔踏塌榻沓蹋嗒挞獭遢趿漯闼鳎铊溻"};
+char PY_mb_tai	[]={"大太台态抬泰胎汰苔钛跆邰肽鲐骀薹酞炱"};
+char PY_mb_tan	[]={"谈探弹叹坦坛贪摊滩谭炭潭毯瘫檀袒痰坍覃碳昙忐澹郯钽锬"};
+char PY_mb_tang	[]={"堂唐汤躺倘糖趟塘棠烫膛淌搪傥螳镗帑溏惝螗樘羰铴醣耥瑭"};
+char PY_mb_tao	[]={"讨套逃陶涛桃掏淘滔萄叨韬啕绦饕洮鼗"};
+char PY_mb_te	[]={"特忒忑慝铽"};
+char PY_mb_teng	[]={"腾疼藤滕誊"};
+char PY_mb_ti	[]={"体提题替梯踢啼蹄剔涕惕屉剃嚏倜悌荑缇逖醍锑鹈裼绨"};
+char PY_mb_tian	[]={"天田添甜填恬舔腆忝阗殄畋掭"};
+char PY_mb_tiao	[]={"条调跳挑眺迢窕佻苕笤髫龆粜祧蜩鲦"};
+char PY_mb_tie	[]={"铁贴帖餮萜"};
+char PY_mb_ting	[]={"听停庭厅挺廷亭艇婷霆汀蜓铤烃梃葶莛"};
+char PY_mb_tong	[]={"同通统痛童铜筒桶桐彤佟瞳恸捅潼仝酮砼嗵茼"};
+char PY_mb_tou	[]={"头投透偷骰"};
+char PY_mb_tu	[]={"图突土途徒吐涂屠兔秃凸荼菟钍堍酴"};
+char PY_mb_tuan	[]={"团湍抟彖疃"};
+char PY_mb_tui	[]={"推退腿颓褪蜕忒煺"};
+char PY_mb_tun	[]={"吞屯褪臀豚饨囤暾氽"};
+char PY_mb_tuo	[]={"托脱拖妥拓驼陀唾驮椭沱鸵佗跎橐鼍坨酡砣庹箨柝柁乇"};
+char PY_mb_wa	[]={"瓦挖娃哇袜蛙洼娲佤腽"};
+char PY_mb_wai	[]={"外歪崴"};
+char PY_mb_wan	[]={"万完晚玩湾弯碗婉挽顽宛腕丸蔓莞惋蜿皖纨畹琬烷绾豌剜芄菀脘"};
+char PY_mb_wang	[]={"王望往忘网亡汪旺妄枉惘罔魍辋"};
+char PY_mb_wei	[]={"为位未微围委维威味卫谓危唯伟违尾慰魏伪韦惟畏喂尉胃薇巍蔚纬萎帷炜苇渭偎玮桅娓猥诿潍帏猬圩葳崴煨逶嵬闱隗韪痿隈鲔洧艉沩涠軎"};
+char PY_mb_wen	[]={"问文闻温稳纹吻雯蚊紊瘟汶刎阌璺攵夂"};
+char PY_mb_weng	[]={"翁嗡瓮蓊蕹"};
+char PY_mb_wo	[]={"我握窝卧沃涡喔渥挝蜗斡倭幄龌莴肟硪"};
+char PY_mb_wu	[]={"无五物务武恶屋误舞午吴乌伍污吾雾悟勿巫呜晤侮毋梧兀诬芜捂坞邬唔妩鹉戊蜈骛忤鹜婺钨寤庑仵牾怃杌焐鋈芴鼯迕阢痦圬"};
+char PY_mb_xi	[]={"西系息喜希细习席戏吸洗惜悉析袭稀夕溪昔牺锡膝晰媳熙隙嘻兮栖奚熄茜曦犀嬉蹊玺徙熹禧羲烯皙淅唏铣蟋檄汐翕蜥郗矽硒歙樨僖屣阋欷隰醯葸螅浠裼舄饩觋舾禊蓰穸鼷菥粞"};
+char PY_mb_xia	[]={"下夏吓霞峡侠狭厦辖暇瞎匣虾遐瑕呷黠狎罅柙硖"};
+char PY_mb_xian	[]={"现见先显线险限献县鲜闲仙陷贤纤嫌弦宪掀衔咸羡娴涎馅舷腺铣暹锨藓痫酰冼氙跹岘苋霰籼燹祆蚬跣鹇莶筅猃"};
+char PY_mb_xiang	[]={"想相向像象响香项乡降享箱祥详翔湘巷厢镶襄橡飨饷骧庠芗缃鲞蟓葙"};
+char PY_mb_xiao	[]={"小消笑效校晓销孝萧削肖啸潇霄宵嚣逍箫哮筱淆硝枭骁绡哓魈崤枵蛸"};
+char PY_mb_xie	[]={"些写谢协斜鞋邪歇胁泄械携卸谐懈屑挟泻蟹偕蝎亵榭楔撷邂颉燮瀣勰缬廨蹀绁躞薤獬渫榍"};
+char PY_mb_xin	[]={"心信新辛欣薪馨芯衅昕鑫忻锌莘歆囟镡"};
+char PY_mb_xing	[]={"行性形兴星省姓幸醒型刑杏邢腥猩惺悻陉荥擤荇饧硎"};
+char PY_mb_xiong	[]={"兄雄胸凶熊汹匈芎"};
+char PY_mb_xiu	[]={"修秀休袖羞臭绣朽嗅锈岫咻馐庥溴髹鸺貅"};
+char PY_mb_xu	[]={"许须续需虚徐序绪叙吁蓄畜旭婿絮嘘恤栩墟胥戌煦酗诩圩勖盱蓿顼溆洫醑糈肷"};
+char PY_mb_xuan	[]={"选宣旋玄悬轩喧璇眩炫绚渲萱暄漩煊铉癣泫楦揎谖儇碹镟痃"};
+char PY_mb_xue	[]={"学血雪薛削穴靴谑踅噱鳕泶"};
+char PY_mb_xun	[]={"寻训讯迅询巡循逊旬勋熏驯浚殉薰汛荀徇醺洵峋巽浔恂鲟埙窨郇荨蕈曛獯"};
+char PY_mb_ya	[]={"压亚牙雅呀押哑讶丫崖涯鸭鸦芽衙轧娅桠琊迓蚜垭睚伢砑揠痖氩岈"};
+char PY_mb_yan	[]={"言眼严验烟研演延颜燕沿掩艳岩厌宴殷炎盐焰咽焉衍雁彦阎淹晏檐砚奄嫣俨妍筵蜒胭谚偃腌堰唁湮焱阉魇滟琰恹赝兖鄢餍剡酽闫郾芫菸鼹阏崦谳埏趼厣罨"};
+char PY_mb_yang	[]={"样阳养扬杨洋央仰羊痒漾殃鸯氧恙佯秧泱怏徉疡炀烊鞅蛘"};
+char PY_mb_yao	[]={"要药摇腰遥咬邀耀钥妖姚尧谣瑶夭窑肴吆麽幺杳曜舀窈鹞繇爻徭铫鳐轺珧崾"};
+char PY_mb_ye	[]={"也业夜叶野爷页耶液冶曳拽谒掖椰噎腋烨晔靥邺揶揲铘"};
+char PY_mb_yi	[]={"一以已意义易议依衣异医疑移艺益亦遗宜伊仪忆艾椅译翼亿役蛇逸抑矣毅谊乙倚溢夷姨疫怡蚁裔邑奕绎驿颐诣翌揖咦沂贻屹懿漪彝熠翊臆弈轶壹迤佚弋羿咿旖挹噫翳胰呓缢猗悒饴痍铱蜴诒镒肄荑欹刈薏嶷眙峄怿苡佾圯瘗嗌殪埸劓癔黟镱钇酏舣"};
+char PY_mb_yin	[]={"因音引银印隐阴饮吟殷尹淫姻荫茵瘾寅垠胤蚓氤喑夤龈狺窨鄞霪洇堙铟吲茚"};
+char PY_mb_ying	[]={"应影英营迎硬映盈赢鹰颖婴莹樱莺蝇荧瑛萤萦瀛膺缨鹦郢滢嘤颍嬴罂楹茔璎荥潆撄媵瘿蓥"};
+char PY_mb_yo	[]={"哟唷"};
+char PY_mb_yong	[]={"用永勇拥涌庸泳咏雍佣踊甬臃恿慵俑邕喁镛蛹痈壅墉饔鳙"};
+char PY_mb_you	[]={"有又由友游右优油尤犹忧幽幼诱悠邮佑酉黝攸猷囿釉柚铀莠宥呦牖鱿繇疣蝣侑莜鼬尢蚰莸铕蝤卣蚴"};
+char PY_mb_yu	[]={"于与语余玉遇雨预欲育鱼愈予宇域羽誉御狱郁裕豫愚吁渔愉尉寓浴喻娱舆虞俞逾禹於瑜驭粥渝榆隅迂淤毓屿臾谕钰盂聿芋馀峪禺昱煜妪熨谀揄腴瘀庾觎阈妤欤竽圄畲鬻萸纡龉伛鹬圉雩燠蜮蓣舁窬俣饫瘐窳狳蝓嵛鹆"};
+char PY_mb_yuan	[]={"原远元院员愿园源圆缘怨援冤袁渊苑猿辕媛鸳垣沅鸢圜爰垸鼋瑗掾塬芫螈橼箢眢"};
+char PY_mb_yue	[]={"说月乐越约跃岳阅悦曰钥粤钺樾栎刖哕龠瀹"};
+char PY_mb_yun	[]={"运云允韵晕蕴孕匀芸酝筠耘纭韫陨熨愠氲恽殒昀郧郓狁"};
+char PY_mb_za	[]={"杂砸咋匝咂拶"};
+char PY_mb_zai	[]={"在子再载灾宰栽哉崽甾"};
+char PY_mb_zan	[]={"赞咱暂攒簪瓒昝錾趱糌"};
+char PY_mb_zang	[]={"脏葬赃臧奘驵"};
+char PY_mb_zao	[]={"早造遭糟噪躁燥灶枣澡凿皂藻蚤唣"};
+char PY_mb_zei	[]={"贼"};
+char PY_mb_zeng	[]={"曾增赠综憎锃甑缯罾"};
+char PY_mb_zen	[]={"怎谮"};
+char PY_mb_ze	[]={"则责择泽啧咋仄帻赜昃舴箦笮迮"};
+char PY_mb_zhai	[]={"宅摘债寨窄斋翟砦瘵"};
+char PY_mb_zhang	[]={"长张章掌丈帐障仗涨账胀杖彰璋樟瘴漳嶂獐蟑幛仉鄣嫜"};
+char PY_mb_zhan	[]={"战站展占沾斩粘栈瞻盏湛詹绽崭毡辗蘸旃谵搌"};
+char PY_mb_zhao	[]={"着找照朝招赵召昭兆罩爪肇沼诏钊棹笊"};
+char PY_mb_zha	[]={"扎炸诈乍眨栅闸轧札咋渣喳榨咤吒柞铡楂蚱齄揸砟痄哳"};
+char PY_mb_zhe	[]={"这着者折哲遮浙辙辄蔗蛰褶谪摺赭鹧螫柘锗蜇磔乇"};
+char PY_mb_zhen	[]={"真阵镇针震振珍贞诊侦枕斟臻帧甄圳桢祯朕赈箴缜疹榛砧鸩轸蓁稹椹畛胗浈"};
+char PY_mb_zheng	[]={"正整证政争征郑挣睁症怔蒸筝拯铮狰峥徵诤钲"};
+char PY_mb_zhi	[]={"之只知至直指制志治支致止值置质执职纸智织枝植旨芝址滞秩汁殖脂侄稚肢掷挚帜窒峙吱芷炙趾蜘咫栉雉桎痣祉痔陟酯帙郅鸷踯摭栀蛭贽豸觯胝轾跖絷骘彘卮枳踬埴黹忮轵膣"};
+char PY_mb_zhong	[]={"中重种众终钟忠仲衷肿冢踵盅锺忪螽舯"};
+char PY_mb_zhou	[]={"周州洲舟骤皱宙昼咒轴肘粥帚纣胄绉诌妯繇啁籀酎碡荮"};
+char PY_mb_zhu	[]={"主住注助属著朱逐珠诸竹祝筑柱驻猪烛嘱株铸煮贮蛛瞩诛竺伫拄蛀渚铢箸侏茱躅杼洙炷苎翥邾麈潴槠舳瘃疰橥"};
+char PY_mb_zhua	[]={"抓爪挝"};
+char PY_mb_zhuai	[]={"拽"};
+char PY_mb_zhuan	[]={"转传专赚砖撰篆馔啭颛"};
+char PY_mb_zhuang	[]={"装状庄壮撞妆桩幢僮"};
+char PY_mb_zhui	[]={"追坠缀锥赘椎惴骓隹缒萑"};
+char PY_mb_zhun	[]={"准屯谆肫窀"};
+char PY_mb_zhuo	[]={"着桌捉卓灼拙浊琢酌啄镯茁濯涿斫擢倬诼禚浞"};
+char PY_mb_zi	[]={"子自字资紫仔姿滋姊兹咨孜渍梓恣籽淄滓龇髭辎孳眦缁秭訾锱呲鲻赀趑谘粢笫耔觜嵫茈"};
+char PY_mb_zong	[]={"总宗纵踪综棕鬃粽偬腙"};
+char PY_mb_zou	[]={"走奏邹揍陬驺鄹诹鲰"};
+char PY_mb_zu	[]={"足族组祖阻租卒诅俎镞菹"};
+char PY_mb_zuan	[]={"钻纂攥缵躜"};
+char PY_mb_zui	[]={"最罪嘴醉蕞觜"};
+char PY_mb_zun	[]={"尊遵樽鳟撙"};
+char PY_mb_zuo	[]={"作做坐左座昨佐祚柞酢唑嘬怍阼胙笮"};
+
+
+const PY py_table[] = {
+	{"a", PY_mb_a},
+	{"ai", PY_mb_ai},
+	{"an", PY_mb_an},
+	{"ang", PY_mb_ang},
+	{"ao", PY_mb_ao},
+	{"ba", PY_mb_ba},
+	{"bai", PY_mb_bai},
+	{"ban", PY_mb_ban},
+	{"bang", PY_mb_bang},
+	{"bao", PY_mb_bao},
+	{"bei", PY_mb_bei},
+	{"ben", PY_mb_ben},
+	{"beng", PY_mb_beng},
+	{"bian", PY_mb_bian},
+	{"biao", PY_mb_biao},
+	{"bie", PY_mb_bie},
+	{"bi", PY_mb_bi},
+	{"bin", PY_mb_bin},
+	{"bing", PY_mb_bing},
+	{"bo", PY_mb_bo},
+	{"bu", PY_mb_bu},
+	{"ca", PY_mb_ca},
+	{"cai", PY_mb_cai},
+	{"can", PY_mb_can},
+	{"cang", PY_mb_cang},
+	{"cao", PY_mb_cao},
+	{"ce", PY_mb_ce},
+	{"cen", PY_mb_cen},
+	{"ceng", PY_mb_ceng},
+	{"cha", PY_mb_cha},
+	{"chai", PY_mb_chai},
+	{"chan", PY_mb_chan},
+	{"chang", PY_mb_chang},
+	{"chao", PY_mb_chao},
+	{"che", PY_mb_che},
+	{"chen", PY_mb_chen},
+	{"cheng", PY_mb_cheng},
+	{"chi", PY_mb_chi},
+	{"chong", PY_mb_chong},
+	{"chou", PY_mb_chou},
+	{"chu", PY_mb_chu},
+	{"chuai", PY_mb_chuai},
+	{"chuan", PY_mb_chuan},
+	{"chuang", PY_mb_chuang},
+	{"chui", PY_mb_chui},
+	{"chun", PY_mb_chun},
+	{"chuo", PY_mb_chuo},
+	{"ci", PY_mb_ci},
+	{"cong", PY_mb_cong},
+	{"cou", PY_mb_cou},
+	{"cu", PY_mb_cu},
+	{"cuan", PY_mb_cuan},
+	{"cui", PY_mb_cui},
+	{"cun", PY_mb_cun},
+	{"cuo", PY_mb_cuo},
+	{"da", PY_mb_da},
+	{"dai", PY_mb_dai},
+	{"dan", PY_mb_dan},
+	{"dang", PY_mb_dang},
+	{"dao", PY_mb_dao},
+	{"de", PY_mb_de},
+	{"deng", PY_mb_deng},
+	{"di", PY_mb_di},
+	{"dia", PY_mb_dia},
+	{"dian", PY_mb_dian},
+	{"diao", PY_mb_diao},
+	{"die", PY_mb_die},
+	{"ding", PY_mb_ding},
+	{"diu", PY_mb_diu},
+	{"dong", PY_mb_dong},
+	{"dou", PY_mb_dou},
+	{"du", PY_mb_du},
+	{"duan", PY_mb_duan},
+	{"dui", PY_mb_dui},
+	{"dun", PY_mb_dun},
+	{"duo", PY_mb_duo},
+	{"e", PY_mb_e},
+	{"ei", PY_mb_ei},
+	{"en", PY_mb_en},
+	{"er", PY_mb_er},
+	{"fa", PY_mb_fa},
+	{"fan", PY_mb_fan},
+	{"fang", PY_mb_fang},
+	{"fei", PY_mb_fei},
+	{"fen", PY_mb_fen},
+	{"feng", PY_mb_feng},
+	{"fo", PY_mb_fo},
+	{"fou", PY_mb_fou},
+	{"fu", PY_mb_fu},
+	{"ga", PY_mb_ga},
+	{"gai", PY_mb_gai},
+	{"gan", PY_mb_gan},
+	{"gang", PY_mb_gang},
+	{"gao", PY_mb_gao},
+	{"gei", PY_mb_gei},
+	{"ge", PY_mb_ge},
+	{"gen", PY_mb_gen},
+	{"geng", PY_mb_geng},
+	{"gong", PY_mb_gong},
+	{"gou", PY_mb_gou},
+	{"gu", PY_mb_gu},
+	{"gua", PY_mb_gua},
+	{"guai", PY_mb_guai},
+	{"guan", PY_mb_guan},
+	{"guang", PY_mb_guang},
+	{"gui", PY_mb_gui},
+	{"gun", PY_mb_gun},
+	{"guo", PY_mb_guo},
+	{"ha", PY_mb_ha},
+	{"hai", PY_mb_hai},
+	{"han", PY_mb_han},
+	{"hang", PY_mb_hang},
+	{"hao", PY_mb_hao},
+	{"he", PY_mb_he},
+	{"hei", PY_mb_hei},
+	{"hen", PY_mb_hen},
+	{"heng", PY_mb_heng},
+	{"hong", PY_mb_hong},
+	{"hou", PY_mb_hou},
+	{"hu", PY_mb_hu},
+	{"hua", PY_mb_hua},
+	{"huai", PY_mb_huai},
+	{"huan", PY_mb_huan},
+	{"huang", PY_mb_huang},
+	{"hui", PY_mb_hui},
+	{"hun", PY_mb_hun},
+	{"huo", PY_mb_huo},
+	{"ji", PY_mb_ji},
+	{"jia", PY_mb_jia},
+	{"jian", PY_mb_jian},
+	{"jiang", PY_mb_jiang},
+	{"jiao", PY_mb_jiao},
+	{"jie", PY_mb_jie},
+	{"jin", PY_mb_jin},
+	{"jing", PY_mb_jing},
+	{"jiong", PY_mb_jiong},
+	{"jiu", PY_mb_jiu},
+	{"ju", PY_mb_ju},
+	{"juan", PY_mb_juan},
+	{"jue", PY_mb_jue},
+	{"jun", PY_mb_jun},
+	{"ka", PY_mb_ka},
+	{"kai", PY_mb_kai},
+	{"kan", PY_mb_kan},
+	{"kang", PY_mb_kang},
+	{"kao", PY_mb_kao},
+	{"ke", PY_mb_ke},
+	{"ken", PY_mb_ken},
+	{"keng", PY_mb_keng},
+	{"kong", PY_mb_kong},
+	{"kou", PY_mb_kou},
+	{"ku", PY_mb_ku},
+	{"kua", PY_mb_kua},
+	{"kuai", PY_mb_kuai},
+	{"kuan", PY_mb_kuan},
+	{"kuang", PY_mb_kuang},
+	{"kui", PY_mb_kui},
+	{"kun", PY_mb_kun},
+	{"kuo", PY_mb_kuo},
+	{"la", PY_mb_la},
+	{"lai", PY_mb_lai},
+	{"lan", PY_mb_lan},
+	{"lang", PY_mb_lang},
+	{"lao", PY_mb_lao},
+	{"le", PY_mb_le},
+	{"lei", PY_mb_lei},
+	{"leng", PY_mb_leng},
+	{"li", PY_mb_li},
+	{"lia", PY_mb_lia},
+	{"lian", PY_mb_lian},
+	{"liang", PY_mb_liang},
+	{"liao", PY_mb_liao},
+	{"lie", PY_mb_lie},
+	{"lin", PY_mb_lin},
+	{"ling", PY_mb_ling},
+	{"liu", PY_mb_liu},
+	{"lo", PY_mb_lo},
+	{"long", PY_mb_long},
+	{"lou", PY_mb_lou},
+	{"lu", PY_mb_lu},
+	{"luan", PY_mb_luan},
+	{"lue", PY_mb_lue},
+	{"lun", PY_mb_lun},
+	{"luo", PY_mb_luo},
+	{"lv", PY_mb_lv},
+	{"m", PY_mb_m},
+	{"ma", PY_mb_ma},
+	{"mai", PY_mb_mai},
+	{"man", PY_mb_man},
+	{"mang", PY_mb_mang},
+	{"mao", PY_mb_mao},
+	{"me", PY_mb_me},
+	{"mei", PY_mb_mei},
+	{"men", PY_mb_men},
+	{"meng", PY_mb_meng},
+	{"mi", PY_mb_mi},
+	{"mian", PY_mb_mian},
+	{"miao", PY_mb_miao},
+	{"mie", PY_mb_mie},
+	{"min", PY_mb_min},
+	{"ming", PY_mb_ming},
+	{"miu", PY_mb_miu},
+	{"mo", PY_mb_mo},
+	{"mou", PY_mb_mou},
+	{"mu", PY_mb_mu},
+	{"na", PY_mb_na},
+	{"nai", PY_mb_nai},
+	{"nang", PY_mb_nang},
+	{"nan", PY_mb_nan},
+	{"nao", PY_mb_nao},
+	{"ne", PY_mb_ne},
+	{"nei", PY_mb_nei},
+	{"nen", PY_mb_nen},
+	{"neng", PY_mb_neng},
+	{"ni", PY_mb_ni},
+	{"nian", PY_mb_nian},
+	{"niang", PY_mb_niang},
+	{"niao", PY_mb_niao},
+	{"nie", PY_mb_nie},
+	{"nin", PY_mb_nin},
+	{"ning", PY_mb_ning},
+	{"niu", PY_mb_niu},
+	{"nong", PY_mb_nong},
+	{"nou", PY_mb_nou},
+	{"nu", PY_mb_nu},
+	{"nuan", PY_mb_nuan},
+	{"nue", PY_mb_nue},
+	{"nuo", PY_mb_nuo},
+	{"nv", PY_mb_nv},
+	{"o", PY_mb_o},
+	{"ou", PY_mb_ou},
+	{"pa", PY_mb_pa},
+	{"pai", PY_mb_pai},
+	{"pan", PY_mb_pan},
+	{"pang", PY_mb_pang},
+	{"pao", PY_mb_pao},
+	{"pei", PY_mb_pei},
+	{"pen", PY_mb_pen},
+	{"peng", PY_mb_peng},
+	{"pi", PY_mb_pi},
+	{"pian", PY_mb_pian},
+	{"piao", PY_mb_piao},
+	{"pie", PY_mb_pie},
+	{"pin", PY_mb_pin},
+	{"ping", PY_mb_ping},
+	{"pou", PY_mb_pou},
+	{"po", PY_mb_po},
+	{"pu", PY_mb_pu},
+	{"puo", PY_mb_puo},
+	{"qi", PY_mb_qi},
+	{"qia", PY_mb_qia},
+	{"qian", PY_mb_qian},
+	{"qiang", PY_mb_qiang},
+	{"qiao", PY_mb_qiao},
+	{"qie", PY_mb_qie},
+	{"qin", PY_mb_qin},
+	{"qing", PY_mb_qing},
+	{"qiong", PY_mb_qiong},
+	{"qiu", PY_mb_qiu},
+	{"qu", PY_mb_qu},
+	{"quan", PY_mb_quan},
+	{"que", PY_mb_que},
+	{"qun", PY_mb_qun},
+	{"ran", PY_mb_ran},
+	{"rang", PY_mb_rang},
+	{"rao", PY_mb_rao},
+	{"re", PY_mb_re},
+	{"ren", PY_mb_ren},
+	{"reng", PY_mb_reng},
+	{"ri", PY_mb_ri},
+	{"rong", PY_mb_rong},
+	{"rou", PY_mb_rou},
+	{"ru", PY_mb_ru},
+	{"ruan", PY_mb_ruan},
+	{"rui", PY_mb_rui},
+	{"run", PY_mb_run},
+	{"ruo", PY_mb_ruo},
+	{"sa", PY_mb_sa},
+	{"sai", PY_mb_sai},
+	{"san", PY_mb_san},
+	{"sang", PY_mb_sang},
+	{"sao", PY_mb_sao},
+	{"se", PY_mb_se},
+	{"sen", PY_mb_sen},
+	{"seng", PY_mb_seng},
+	{"sha", PY_mb_sha},
+	{"shai", PY_mb_shai},
+	{"shan", PY_mb_shan},
+	{"shang", PY_mb_shang},
+	{"shao", PY_mb_shao},
+	{"she", PY_mb_she},
+	{"shen", PY_mb_shen},
+	{"sheng", PY_mb_sheng},
+	{"shi", PY_mb_shi},
+	{"shou", PY_mb_shou},
+	{"shu", PY_mb_shu},
+	{"shua", PY_mb_shua},
+	{"shuai", PY_mb_shuai},
+	{"shuan", PY_mb_shuan},
+	{"shuang", PY_mb_shuang},
+	{"shui", PY_mb_shui},
+	{"shun", PY_mb_shun},
+	{"shuo", PY_mb_shuo},
+	{"si", PY_mb_si},
+	{"song", PY_mb_song},
+	{"sou", PY_mb_sou},
+	{"su", PY_mb_su},
+	{"suan", PY_mb_suan},
+	{"sui", PY_mb_sui},
+	{"sun", PY_mb_sun},
+	{"suo", PY_mb_suo},
+	{"ta", PY_mb_ta},
+	{"tai", PY_mb_tai},
+	{"tan", PY_mb_tan},
+	{"tang", PY_mb_tang},
+	{"tao", PY_mb_tao},
+	{"te", PY_mb_te},
+	{"teng", PY_mb_teng},
+	{"ti", PY_mb_ti},
+	{"tian", PY_mb_tian},
+	{"tiao", PY_mb_tiao},
+	{"tie", PY_mb_tie},
+	{"ting", PY_mb_ting},
+	{"tong", PY_mb_tong},
+	{"tou", PY_mb_tou},
+	{"tu", PY_mb_tu},
+	{"tuan", PY_mb_tuan},
+	{"tui", PY_mb_tui},
+	{"tun", PY_mb_tun},
+	{"tuo", PY_mb_tuo},
+	{"wa", PY_mb_wa},
+	{"wai", PY_mb_wai},
+	{"wan", PY_mb_wan},
+	{"wang", PY_mb_wang},
+	{"wei", PY_mb_wei},
+	{"wen", PY_mb_wen},
+	{"weng", PY_mb_weng},
+	{"wo", PY_mb_wo},
+	{"wu", PY_mb_wu},
+	{"xi", PY_mb_xi},
+	{"xia", PY_mb_xia},
+	{"xian", PY_mb_xian},
+	{"xiang", PY_mb_xiang},
+	{"xiao", PY_mb_xiao},
+	{"xie", PY_mb_xie},
+	{"xin", PY_mb_xin},
+	{"xing", PY_mb_xing},
+	{"xiong", PY_mb_xiong},
+	{"xiu", PY_mb_xiu},
+	{"xu", PY_mb_xu},
+	{"xuan", PY_mb_xuan},
+	{"xue", PY_mb_xue},
+	{"xun", PY_mb_xun},
+	{"ya", PY_mb_ya},
+	{"yan", PY_mb_yan},
+	{"yang", PY_mb_yang},
+	{"yao", PY_mb_yao},
+	{"ye", PY_mb_ye},
+	{"yi", PY_mb_yi},
+	{"yin", PY_mb_yin},
+	{"ying", PY_mb_ying},
+	{"yo", PY_mb_yo},
+	{"yong", PY_mb_yong},
+	{"you", PY_mb_you},
+	{"yu", PY_mb_yu},
+	{"yuan", PY_mb_yuan},
+	{"yue", PY_mb_yue},
+	{"yun", PY_mb_yun},
+	{"za", PY_mb_za},
+	{"zai", PY_mb_zai},
+	{"zan", PY_mb_zan},
+	{"zang", PY_mb_zang},
+	{"zao", PY_mb_zao},
+	{"zei", PY_mb_zei},
+	{"zeng", PY_mb_zeng},
+	{"zen", PY_mb_zen},
+	{"ze", PY_mb_ze},
+	{"zhai", PY_mb_zhai},
+	{"zhang", PY_mb_zhang},
+	{"zhan", PY_mb_zhan},
+	{"zhao", PY_mb_zhao},
+	{"zha", PY_mb_zha},
+	{"zhe", PY_mb_zhe},
+	{"zhen", PY_mb_zhen},
+	{"zheng", PY_mb_zheng},
+	{"zhi", PY_mb_zhi},
+	{"zhong", PY_mb_zhong},
+	{"zhou", PY_mb_zhou},
+	{"zhu", PY_mb_zhu},
+	{"zhua", PY_mb_zhua},
+	{"zhuai", PY_mb_zhuai},
+	{"zhuan", PY_mb_zhuan},
+	{"zhuang", PY_mb_zhuang},
+	{"zhui", PY_mb_zhui},
+	{"zhun", PY_mb_zhun},
+	{"zhuo", PY_mb_zhuo},
+	{"zi", PY_mb_zi},
+	{"zong", PY_mb_zong},
+	{"zou", PY_mb_zou},
+	{"zu", PY_mb_zu},
+	{"zuan", PY_mb_zuan},
+	{"zui", PY_mb_zui},
+	{"zun", PY_mb_zun},
+	{"zuo", PY_mb_zuo}
+};
+
+const struct t9_py t9_py_table[] = {
+	{2, "a", PY_mb_a},
+	{2, "b", PY_mb_ba},
+	{2, "c", PY_mb_ca},
+	{3, "d", PY_mb_da},
+	{3, "e", PY_mb_e},
+	{3, "f", PY_mb_fa},
+	{6, "m", PY_mb_m},
+	{6, "n", PY_mb_na},
+	{6, "o", PY_mb_o},
+	{22, "ba", PY_mb_ba},
+	{22, "ca", PY_mb_ca},
+	{23, "be", PY_mb_bei},
+	{23, "ce", PY_mb_ce},
+	{24, "ai", PY_mb_ai},
+	{24, "bi", PY_mb_bi},
+	{24, "ch", PY_mb_cha},
+	{24, "ci", PY_mb_ci},
+	{26, "an", PY_mb_an},
+	{26, "ao", PY_mb_ao},
+	{26, "bo", PY_mb_bo},
+	{26, "co", PY_mb_cong},
+	{28, "bu", PY_mb_bu},
+	{28, "cu", PY_mb_cu},
+	{32, "da", PY_mb_da},
+	{32, "di", PY_mb_dia},
+	{32, "fa", PY_mb_fa},
+	{33, "de", PY_mb_de},
+	{33, "fe", PY_mb_fei},
+	{34, "di", PY_mb_di},
+	{34, "ei", PY_mb_ei},
+	{36, "do", PY_mb_dong},
+	{36, "en", PY_mb_en},
+	{36, "fo", PY_mb_fo},
+	{37, "er", PY_mb_er},
+	{38, "du", PY_mb_du},
+	{38, "fu", PY_mb_fu},
+	{42, "ga", PY_mb_ga},
+	{42, "ha", PY_mb_ha},
+	{43, "ge", PY_mb_ge},
+	{43, "he", PY_mb_he},
+	{48, "gu", PY_mb_gu},
+	{48, "hu", PY_mb_hu},
+	{52, "ka", PY_mb_ka},
+	{52, "la", PY_mb_la},
+	{53, "ke", PY_mb_ke},
+	{53, "le", PY_mb_le},
+	{54, "ji", PY_mb_ji},
+	{54, "li", PY_mb_li},
+	{56, "ko", PY_mb_kong},
+	{56, "lo", PY_mb_lo},
+	{58, "ju", PY_mb_ju},
+	{58, "ku", PY_mb_ku},
+	{58, "lu", PY_mb_lu},
+	{58, "lv", PY_mb_lv},
+	{62, "ma", PY_mb_ma},
+	{62, "na", PY_mb_na},
+	{63, "me", PY_mb_me},
+	{63, "ne", PY_mb_ne},
+	{64, "mi", PY_mb_mi},
+	{64, "ni", PY_mb_ni},
+	{66, "mo", PY_mb_mo},
+	{66, "no", PY_mb_nong},
+	{68, "mu", PY_mb_mu},
+	{68, "nu", PY_mb_nu},
+	{68, "nv", PY_mb_nv},
+	{68, "ou", PY_mb_ou},
+	{72, "pa", PY_mb_pa},
+	{72, "ra", PY_mb_ran},
+	{72, "sa", PY_mb_sa},
+	{73, "pe", PY_mb_pei},
+	{73, "re", PY_mb_re},
+	{73, "se", PY_mb_se},
+	{74, "pi", PY_mb_pi},
+	{74, "qi", PY_mb_qi},
+	{74, "ri", PY_mb_ri},
+	{74, "sh", PY_mb_sha},
+	{74, "si", PY_mb_si},
+	{76, "po", PY_mb_po},
+	{76, "ro", PY_mb_rong},
+	{76, "so", PY_mb_song},
+	{78, "pu", PY_mb_pu},
+	{78, "qu", PY_mb_qu},
+	{78, "ru", PY_mb_ru},
+	{78, "su", PY_mb_su},
+	{82, "ta", PY_mb_ta},
+	{83, "te", PY_mb_te},
+	{84, "ti", PY_mb_ti},
+	{88, "tu", PY_mb_tu},
+	{92, "wa", PY_mb_wa},
+	{92, "ya", PY_mb_ya},
+	{92, "za", PY_mb_za},
+	{93, "we", PY_mb_wei},
+	{93, "ye", PY_mb_ye},
+	{93, "ze", PY_mb_ze},
+	{94, "xi", PY_mb_xi},
+	{94, "yi", PY_mb_yi},
+	{94, "zh", PY_mb_zha},
+	{94, "zi", PY_mb_zi},
+	{96, "wo", PY_mb_wo},
+	{96, "yo", PY_mb_yo},
+	{96, "zo", PY_mb_zong},
+	{98, "wu", PY_mb_wu},
+	{98, "xu", PY_mb_xu},
+	{98, "yu", PY_mb_yu},
+	{98, "zu", PY_mb_zu},
+	{224, "bai", PY_mb_bai},
+	{224, "cai", PY_mb_cai},
+	{226, "ban", PY_mb_ban},
+	{226, "bao", PY_mb_bao},
+	{226, "can", PY_mb_can},
+	{226, "cao", PY_mb_cao},
+	{234, "bei", PY_mb_bei},
+	{236, "ben", PY_mb_ben},
+	{236, "cen", PY_mb_cen},
+	{242, "bia", PY_mb_bian},
+	{242, "cha", PY_mb_cha},
+	{243, "bie", PY_mb_bie},
+	{243, "che", PY_mb_che},
+	{244, "chi", PY_mb_chi},
+	{246, "bin", PY_mb_bin},
+	{246, "cho", PY_mb_chong},
+	{248, "chu", PY_mb_chu},
+	{264, "ang", PY_mb_ang},
+	{268, "cou", PY_mb_cou},
+	{284, "cui", PY_mb_cui},
+	{286, "cun", PY_mb_cun},
+	{286, "cuo", PY_mb_cuo},
+	{324, "dai", PY_mb_dai},
+	{324, "dia", PY_mb_dia},
+	{326, "dan", PY_mb_dan},
+	{326, "dao", PY_mb_dao},
+	{326, "fan", PY_mb_fan},
+	{334, "fei", PY_mb_fei},
+	{336, "den", PY_mb_deng},
+	{336, "fen", PY_mb_fen},
+	{343, "die", PY_mb_die},
+	{348, "diu", PY_mb_diu},
+	{368, "dou", PY_mb_dou},
+	{368, "fou", PY_mb_fou},
+	{384, "dui", PY_mb_dui},
+	{386, "dun", PY_mb_dun},
+	{386, "duo", PY_mb_duo},
+	{423, "hai", PY_mb_hai},
+	{424, "gai", PY_mb_gai},
+	{426, "gan", PY_mb_gan},
+	{426, "gao", PY_mb_gao},
+	{426, "han", PY_mb_han},
+	{426, "hao", PY_mb_hao},
+	{434, "gei", PY_mb_gei},
+	{434, "hei", PY_mb_hei},
+	{436, "gen", PY_mb_gan},
+	{436, "hen", PY_mb_hen},
+	{468, "gou", PY_mb_gou},
+	{468, "hou", PY_mb_hou},
+	{482, "gua", PY_mb_gua},
+	{482, "hua", PY_mb_hua},
+	{484, "gui", PY_mb_gui},
+	{484, "hui", PY_mb_hui},
+	{486, "gun", PY_mb_gun},
+	{486, "guo", PY_mb_guo},
+	{486, "hun", PY_mb_hun},
+	{486, "huo", PY_mb_huo},
+	{524, "kai", PY_mb_kai},
+	{524, "lai", PY_mb_lai},
+	{526, "kan", PY_mb_kan},
+	{526, "kao", PY_mb_kao},
+	{526, "lan", PY_mb_lan},
+	{526, "lao", PY_mb_lao},
+	{534, "lei", PY_mb_lei},
+	{536, "ken", PY_mb_ken},
+	{536, "len", PY_mb_leng},
+	{542, "jia", PY_mb_jia},
+	{542, "lia", PY_mb_lia},
+	{543, "jie", PY_mb_jie},
+	{543, "lie", PY_mb_lie},
+	{546, "jin", PY_mb_jin},
+	{546, "jio", PY_mb_jiong},
+	{546, "lin", PY_mb_lin},
+	{548, "jiu", PY_mb_jiu},
+	{548, "liu", PY_mb_liu},
+	{568, "kou", PY_mb_kou},
+	{568, "lou", PY_mb_lou},
+	{582, "jua", PY_mb_juan},
+	{582, "kua", PY_mb_kua},
+	{582, "lua", PY_mb_luan},
+	{583, "jue", PY_mb_jue},
+	{583, "lue", PY_mb_lue},
+	{584, "kui", PY_mb_kui},
+	{586, "jun", PY_mb_jun},
+	{586, "kun", PY_mb_kun},
+	{586, "kuo", PY_mb_kuo},
+	{586, "lun", PY_mb_lun},
+	{586, "luo", PY_mb_luo},
+	{624, "mai", PY_mb_mai},
+	{624, "nai", PY_mb_nai},
+	{626, "man", PY_mb_man},
+	{626, "mao", PY_mb_mao},
+	{626, "nan", PY_mb_nan},
+	{626, "nao", PY_mb_nao},
+	{634, "mei", PY_mb_mei},
+	{634, "nei", PY_mb_nei},
+	{636, "men", PY_mb_men},
+	{636, "nen", PY_mb_nen},
+	{643, "mie", PY_mb_mie},
+	{643, "nie", PY_mb_nie},
+	{646, "min", PY_mb_min},
+	{646, "nin", PY_mb_nin},
+	{648, "miu", PY_mb_miu},
+	{648, "niu", PY_mb_niu},
+	{668, "mou", PY_mb_mou},
+	{668, "nou", PY_mb_nou},
+	{683, "nue", PY_mb_nue},
+	{686, "nuo", PY_mb_nuo},
+	{724, "pai", PY_mb_pai},
+	{724, "sai", PY_mb_sai},
+	{726, "pan", PY_mb_pan},
+	{726, "pao", PY_mb_pao},
+	{726, "ran", PY_mb_ran},
+	{726, "rao", PY_mb_rao},
+	{726, "san", PY_mb_san},
+	{726, "sao", PY_mb_sao},
+	{734, "pei", PY_mb_pei},
+	{736, "pen", PY_mb_pen},
+	{736, "ren", PY_mb_ren},
+	{736, "sen", PY_mb_sen},
+	{742, "pia", PY_mb_pian},
+	{742, "qia", PY_mb_qia},
+	{742, "sha", PY_mb_sha},
+	{743, "pie", PY_mb_pie},
+	{743, "qie", PY_mb_qie},
+	{743, "she", PY_mb_she},
+	{744, "shi", PY_mb_shi},
+	{746, "pin", PY_mb_pin},
+	{746, "qin", PY_mb_qin},
+	{746, "qio", PY_mb_qiong},
+	{746, "sho", PY_mb_shou},
+	{748, "qiu", PY_mb_qiu},
+	{748, "shu", PY_mb_shu},
+	{768, "pou", PY_mb_pou},
+	{768, "rou", PY_mb_rou},
+	{768, "sou", PY_mb_sou},
+	{783, "que", PY_mb_que},
+	{784, "rui", PY_mb_rui},
+	{784, "sui", PY_mb_sui},
+	{786, "puo", PY_mb_puo},
+	{786, "qun", PY_mb_qun},
+	{786, "run", PY_mb_run},
+	{786, "ruo", PY_mb_ruo},
+	{786, "sun", PY_mb_sun},
+	{786, "suo", PY_mb_suo},
+	{824, "tai", PY_mb_tai},
+	{826, "tan", PY_mb_tan},
+	{826, "tao", PY_mb_tao},
+	{843, "tie", PY_mb_tie},
+	{868, "tou", PY_mb_tou},
+	{884, "tui", PY_mb_tui},
+	{886, "tun", PY_mb_tun},
+	{886, "tuo", PY_mb_tuo},
+	{924, "wai", PY_mb_wai},
+	{924, "zai", PY_mb_zai},
+	{926, "wan", PY_mb_wan},
+	{926, "yan", PY_mb_yan},
+	{926, "yao", PY_mb_yao},
+	{926, "zan", PY_mb_zan},
+	{926, "zao", PY_mb_zao},
+	{934, "wei", PY_mb_wei},
+	{934, "zei", PY_mb_zei},
+	{936, "wen", PY_mb_wen},
+	{936, "zen", PY_mb_zen},
+	{942, "xia", PY_mb_xia},
+	{942, "zha", PY_mb_zha},
+	{943, "xie", PY_mb_xie},
+	{943, "zhe", PY_mb_zhe},
+	{944, "zhi", PY_mb_zhi},
+	{946, "xin", PY_mb_xin},
+	{946, "xio", PY_mb_xiong},
+	{946, "yin", PY_mb_yin},
+	{946, "zho", PY_mb_zhong},
+	{948, "xiu", PY_mb_xiu},
+	{948, "zhu", PY_mb_zhu},
+	{968, "you", PY_mb_you},
+	{968, "zou", PY_mb_zou},
+	{983, "xue", PY_mb_xue},
+	{983, "yue", PY_mb_yue},
+	{984, "zui", PY_mb_zui},
+	{986, "xun", PY_mb_xun},
+	{986, "yun", PY_mb_yun},
+	{986, "zun", PY_mb_zun},
+	{986, "zuo", PY_mb_zuo},
+	{2264, "bang", PY_mb_bang},
+	{2264, "cang", PY_mb_cang},
+	{2364, "beng", PY_mb_beng},
+	{2364, "ceng", PY_mb_ceng},
+	{2424, "chai", PY_mb_chai},
+	{2426, "bian", PY_mb_bian},
+	{2426, "biao", PY_mb_biao},
+	{2426, "chan", PY_mb_chan},
+	{2426, "chao", PY_mb_chao},
+	{2436, "chen", PY_mb_chen},
+	{2464, "bing", PY_mb_bing},
+	{2468, "chou", PY_mb_chou},
+	{2484, "chuai", PY_mb_chuai},
+	{2484, "chui", PY_mb_chui},
+	{2484, "chun", PY_mb_chun},
+	{2486, "chuo", PY_mb_chuo},
+	{2664, "cong", PY_mb_cong},
+	{2826, "cuan", PY_mb_cuan},
+	{3264, "dang", PY_mb_dang},
+	{3264, "fang", PY_mb_fang},
+	{3364, "deng", PY_mb_deng},
+	{3364, "feng", PY_mb_feng},
+	{3426, "dian", PY_mb_dian},
+	{3426, "diao", PY_mb_diao},
+	{3464, "ding", PY_mb_ding},
+	{3664, "dong", PY_mb_dong},
+	{3826, "duan", PY_mb_duan},
+	{4264, "gang", PY_mb_gang},
+	{4264, "hang", PY_mb_hang},
+	{4364, "geng", PY_mb_geng},
+	{4364, "heng", PY_mb_heng},
+	{4664, "gong", PY_mb_gong},
+	{4664, "hong", PY_mb_hong},
+	{4823, "huai", PY_mb_huai},
+	{4824, "guai", PY_mb_guai},
+	{4826, "guan", PY_mb_guan},
+	{4826, "huan", PY_mb_huan},
+	{5264, "kang", PY_mb_kang},
+	{5264, "lang", PY_mb_lang},
+	{5364, "keng", PY_mb_keng},
+	{5366, "leng", PY_mb_leng},
+	{5426, "jian", PY_mb_jian},
+	{5426, "jiao", PY_mb_jiao},
+	{5426, "lian", PY_mb_lian},
+	{5426, "liao", PY_mb_liao},
+	{5464, "jing", PY_mb_jing},
+	{5464, "ling", PY_mb_ling},
+	{5664, "kong", PY_mb_kong},
+	{5664, "long", PY_mb_long},
+	{5824, "kuai", PY_mb_kuai},
+	{5826, "juan", PY_mb_juan},
+	{5826, "kuan", PY_mb_kuan},
+	{5826, "luan", PY_mb_luan},
+	{6264, "mang", PY_mb_mang},
+	{6264, "nang", PY_mb_nang},
+	{6364, "meng", PY_mb_meng},
+	{6364, "neng", PY_mb_neng},
+	{6426, "mian", PY_mb_mian},
+	{6426, "miao", PY_mb_miao},
+	{6426, "nian", PY_mb_nian},
+	{6426, "niao", PY_mb_niao},
+	{6464, "ming", PY_mb_ming},
+	{6464, "ning", PY_mb_ning},
+	{6664, "nong", PY_mb_nong},
+	{6826, "nuan", PY_mb_nuan},
+	{7264, "pang", PY_mb_pang},
+	{7264, "rang", PY_mb_rang},
+	{7264, "sang", PY_mb_sang},
+	{7364, "peng", PY_mb_peng},
+	{7364, "reng", PY_mb_reng},
+	{7364, "seng", PY_mb_seng},
+	{7424, "shai", PY_mb_shai},
+	{7426, "pian", PY_mb_pian},
+	{7426, "piao", PY_mb_piao},
+	{7426, "qian", PY_mb_qian},
+	{7426, "qiao", PY_mb_qiao},
+	{7426, "shan", PY_mb_shan},
+	{7426, "shao", PY_mb_shao},
+	{7436, "shen", PY_mb_shen},
+	{7464, "ping", PY_mb_ping},
+	{7464, "qing", PY_mb_qing},
+	{7468, "shou", PY_mb_shou},
+	{7482, "shua", PY_mb_shua},
+	{7484, "shui", PY_mb_shui},
+	{7486, "shun", PY_mb_shun},
+	{7486, "shuo", PY_mb_shuo},
+	{7664, "rong", PY_mb_rong},
+	{7664, "song", PY_mb_song},
+	{7826, "quan", PY_mb_quan},
+	{7826, "ruan", PY_mb_ruan},
+	{7826, "suan", PY_mb_suan},
+	{8264, "tang", PY_mb_tang},
+	{8364, "teng", PY_mb_teng},
+	{8426, "tian", PY_mb_tian},
+	{8426, "tiao", PY_mb_tiao},
+	{8464, "ting", PY_mb_ting},
+	{8664, "tong", PY_mb_tong},
+	{8826, "tuan", PY_mb_tuan},
+	{9264, "wang", PY_mb_wang},
+	{9264, "yang", PY_mb_yang},
+	{9264, "zang", PY_mb_zang},
+	{9364, "weng", PY_mb_weng},
+	{9364, "zeng", PY_mb_zeng},
+	{9424, "zhai", PY_mb_zhai},
+	{9426, "xian", PY_mb_xiao},
+	{9426, "xiao", PY_mb_xiao},
+	{9426, "zhan", PY_mb_zhan},
+	{9426, "zhao", PY_mb_zhao},
+	{9436, "zhen", PY_mb_zhen},
+	{9464, "xing", PY_mb_xing},
+	{9464, "ying", PY_mb_ying},
+	{9468, "zhou", PY_mb_zhou},
+	{9482, "zhua", PY_mb_zhua},
+	{9484, "zhui", PY_mb_zhui},
+	{9486, "zhun", PY_mb_zhun},
+	{9486, "zhuo", PY_mb_zhuo},
+	{9664, "yong", PY_mb_yong},
+	{9664, "zong", PY_mb_zong},
+	{9826, "xuan", PY_mb_xuan},
+	{9826, "yuan", PY_mb_yuan},
+	{9826, "zuan", PY_mb_zuan},
+	{24264, "chang", PY_mb_chang},
+	{24364, "cheng", PY_mb_cheng},
+	{24664, "chong", PY_mb_chong},
+	{24826, "chuan", PY_mb_chuan},
+	{48264, "guang", PY_mb_guang},
+	{48264, "huang", PY_mb_huang},
+	{54264, "jiang", PY_mb_jiang},
+	{54264, "liang", PY_mb_liang},
+	{54664, "jiong", PY_mb_jiong},
+	{58264, "kuang", PY_mb_kuang},
+	{64264, "niang", PY_mb_niang},
+	{74264, "qiang", PY_mb_qiang},
+	{74264, "shang", PY_mb_shang},
+	{74364, "sheng", PY_mb_sheng},
+	{74664, "qiong", PY_mb_qiong},
+	{74824, "shuai", PY_mb_shuai},
+	{74826, "shuan", PY_mb_shuan},
+	{94264, "xiang", PY_mb_xiang},
+	{94264, "zhang", PY_mb_zhang},
+	{94364, "zheng", PY_mb_zheng},
+	{94664, "xiong", PY_mb_xiong},
+	{94664, "zhong", PY_mb_zhong},
+	{94824, "zhuai", PY_mb_zhuai},
+	{94826, "zhuan", PY_mb_zhuan},
+	{248264, "chuang", PY_mb_chuang},
+	{748264, "shuang", PY_mb_shuang},
+	{948264, "zhuang", PY_mb_zhuang}
+};
+
+const char * py_ime(char* py)
+{
+	int tail = 0;
+	int head = sizeof(py_table)/sizeof(py_table[0]) - 1;
+	int cur, bmp;
+
+	if( !py ) return NULL;
+
+	while( tail <= head )
+	{
+		cur = (head+tail) >> 1;
+		bmp = strcmp((const char*)py_table[cur].py, (const char*)py);
+		if( bmp == 0 )
+		{
+			return py_table[cur].str;
+		}
+		else if ( bmp < 0 )
+		{
+			tail = cur+1;
+		}
+		else
+		{
+			head = cur-1;
+		}
+	}
+
+	return 0;
+}
+
+int str_in(const char *sur, const char *dst)
+{
+	while( *dst && *sur && ( *dst++ == *sur++ ) );
+	
+	if( *dst == 0 ) return 0;
+	
+	return strcmp(sur, dst);
+}
+
+const char * py_ime_string(char* py)
+{
+	int tail = 0;
+	int head = sizeof(py_table)/sizeof(py_table[0]) - 1;
+	int cur, bmp;
+
+	if( !py ) return NULL;
+
+	while( tail <= head )
+	{
+		cur = (head+tail) >> 1;
+		bmp = str_in((const char*)py_table[cur].py, (const char*)py);
+		if( bmp == 0 )
+		{
+			return py_table[cur].str;
+		}
+		else if ( bmp < 0 )
+		{
+			tail = cur+1;
+		}
+		else
+		{
+			head = cur-1;
+		}
+	}
+
+	return 0;
+}
+
+const struct t9_py* t9_py_ime(char *t9)
+{	
+	int bmp;
+	int t;
+	int cur;
+	int tail = 0;
+	int head = sizeof(t9_py_table)/sizeof(t9_py_table[0]) - 1;
+	
+	if( !t9 ) return 0;
+			
+	t = atoi(t9);
+	if( t < t9_py_table[0].t || t > t9_py_table[head].t ) return 0;
+	
+
+	
+	while( tail <= head )
+	{
+		cur = (head+tail) >> 1;
+		bmp = t - t9_py_table[cur].t;
+		if( bmp == 0 )
+		{
+			while( cur > 0 && (t == t9_py_table[cur - 1].t) ) cur--;
+			
+			return t9_py_table + cur;
+		}
+		else if ( bmp > 0 )
+		{
+			tail = cur+1;
+		}
+		else
+		{
+			head = cur-1;
+		}		
+	}
+	
+	return 0;
+}
+
+const struct t9_py* t9_py_next(const struct t9_py *t9)
+{
+	if( t9 < t9_py_table || t9 > t9_py_table + sizeof(t9_py_table)/sizeof(t9_py_table[0]) ) return 0;
+	
+	if( t9->t == (t9+1)->t) return t9 + 1;
+
+	while( t9 >= t9_py_table && t9->t == (t9-1)->t ) t9--;
+	
+	return t9;
+}
+
+#if 0
+
+int main(int argc, char* argv[])
+{
+	char buf[128];
+	char *pinyin;
+	char *str;
+	scanf("%s", buf);
+	
+	const struct t9_py *t9 = t9_py_ime(buf);
+	
+	printf("pinyin:%s\t str:%s\n", t9->py, t9->str);
+	
+	while( t9 = t9_py_next(t9) )
+	{
+		printf("pinyin:%s\t str:%s\n", t9->py, t9->str);
+	}
+
+
+	return 0;
+}
+
+#endif

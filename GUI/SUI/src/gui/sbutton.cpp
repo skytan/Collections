@@ -1,0 +1,49 @@
+#include "sbutton.h"
+#include "sperr.h"
+#include "wchar.h"
+
+sButton::sButton(const char *str, s_callback fun, void *data)
+{
+	m_isShow = true;
+	m_enable_focus = true;
+	m_click_fun = 0;
+	m_click_data = 0;
+	
+	if( fun ) m_click_fun = fun;
+	if( data ) m_click_data = data;
+	if( str ) setText(str);
+}
+
+void sButton::focusExchange()
+{
+	this->update();
+}
+
+void sButton::update()
+{
+ // perr();
+ // wprintf(L"%s\n", text);
+ 	fillRect();
+	drawRect();
+  
+	int x = ((m_left + m_right) >> 1)  - (get_text_weight(m_text) >> 1);
+	int ypos = ((m_top + m_buttom + 1) >> 1)  - (get_font_height() >> 1);
+  
+	if(m_selected)
+	{
+		x -= get_font_weight(L'<');
+		x += drawFont(x, ypos, L'<');
+	}
+  
+	for( int i = 0; m_text[i]; i++ ) 
+	{
+		x += drawFont(x, ypos, m_text[i]);
+	}
+  
+	if(m_selected) drawFont(x, ypos, L'>'); 
+}
+
+void sButton::click(class sEvent *e)
+{
+	if( m_click_fun ) m_click_fun(this, e, m_click_data);
+}
