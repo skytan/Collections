@@ -1,0 +1,62 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Demo - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP93B6.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/Demo.pdb" /debug /machine:I386 /out:"Debug/Demo.exe" /pdbtype:sept 
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\autofit.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\bdf.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\cff.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftbase.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftbbox.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftbdf.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftbitmap.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftcache.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftdebug.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftfntfmt.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftfstype.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftgasp.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftglyph.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftgxval.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftgzip.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftinit.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftlzw.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftmm.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftotval.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftpfr.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftstroke.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftsynth.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftsystem.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\fttype1.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ftwinfnt.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\pcf.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\pfr.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\psaux.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\pshinter.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\psmodule.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\raster.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\sfnt.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\smooth.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\truetype.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\type1.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\type1cid.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\type42.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\winfnt.obj"
+"\vc++\PROJECTS\freetype\freetype\objs\debug_st\ft_bitmap.obj"
+]
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP93B6.tmp"
+<h3>Output Window</h3>
+Linking...
+
+
+
+<h3>Results</h3>
+Demo.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
